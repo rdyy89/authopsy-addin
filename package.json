@@ -1,0 +1,30 @@
+{
+  "name": "authopsy-addin",
+  "version": "1.0.0",
+  "description": "Email authentication analyzer for DMARC, DKIM, and SPF",
+  "main": "taskpane.html",
+  "scripts": {
+    "start": "office-addin-dev-server --source . --port 3000",
+    "build": "echo 'Build completed'",
+    "deploy": "echo 'Deploy to GitHub Pages'"
+  },
+  "keywords": [
+    "outlook",
+    "addin",
+    "dmarc",
+    "dkim",
+    "spf",
+    "email",
+    "authentication"
+  ],
+  "author": "rdyy89",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rdyy89/authopsy-addin.git"
+  },
+  "homepage": "https://rdyy89.github.io/authopsy-addin",
+  "devDependencies": {
+    "office-addin-dev-server": "^1.0.0"
+  }
+}

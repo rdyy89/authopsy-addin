@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Authopsy</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+    <link rel="stylesheet" href="taskpane.css" />
+</head>
+
+<body>
+    <div class="ms-welcome">
+        <header class="ms-welcome__header ms-u-fadeIn500">
+            <img width="32" height="32" src="icons/authopsy.png" alt="Authopsy" title="Authopsy" />
+            <h1 class="ms-font-su ms-fontColor-neutralPrimary ms-u-fadeIn500">Authopsy</h1>
+        </header>
+        
+        <main id="app-body" class="ms-welcome__main">
+            <div class="ms-welcome__intro">
+                <p class="ms-font-l ms-fontColor-neutralSecondary ms-u-fadeIn500">
+                    Email Authentication Analysis
+                </p>
+            </div>
+
+            <div id="loading" class="loading-container ms-u-fadeIn500">
+                <p class="ms-font-m ms-fontColor-neutralSecondary">Loading email analysis...</p>
+                <div class="loading-spinner"></div>
+            </div>
+
+            <div id="results" class="results-container" style="display: none;">
+                <div class="auth-result" id="dmarc-result">
+                    <div class="auth-header">
+                        <img id="dmarc-icon" class="status-icon" src="icons/unknown.png" alt="DMARC Status" />
+                        <span class="auth-label ms-font-m">DMARC:</span>
+                        <span id="dmarc-status" class="auth-status ms-font-m">Loading...</span>
+                    </div>
+                    <button id="dmarc-details" class="details-btn ms-Button" style="display: none;">
+                        <span class="ms-Button-label">Details</span>
+                    </button>
+                </div>
+
+                <div class="auth-result" id="dkim-result">
+                    <div class="auth-header">
+                        <img id="dkim-icon" class="status-icon" src="icons/unknown.png" alt="DKIM Status" />
+                        <span class="auth-label ms-font-m">DKIM:</span>
+                        <span id="dkim-status" class="auth-status ms-font-m">Loading...</span>
+                    </div>
+                    <button id="dkim-details" class="details-btn ms-Button" style="display: none;">
+                        <span class="ms-Button-label">Details</span>
+                    </button>
+                </div>
+
+                <div class="auth-result" id="spf-result">
+                    <div class="auth-header">
+                        <img id="spf-icon" class="status-icon" src="icons/unknown.png" alt="SPF Status" />
+                        <span class="auth-label ms-font-m">SPF:</span>
+                        <span id="spf-status" class="auth-status ms-font-m">Loading...</span>
+                    </div>
+                    <button id="spf-details" class="details-btn ms-Button" style="display: none;">
+                        <span class="ms-Button-label">Details</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="error" class="error-container" style="display: none;">
+                <p class="ms-font-m ms-fontColor-error">Unable to analyze this email. Please select a received email message.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for details -->
+    <div id="detailsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="ms-font-l">Details</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modal-content" class="ms-font-m"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="taskpane.js"></script>
+</body>
+</html>
