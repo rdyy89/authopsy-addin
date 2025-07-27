@@ -1,58 +1,103 @@
 # Authopsy - Outlook Add-in
 
-Authopsy is an Outlook add-in that analyzes email authentication status including DMARC, DKIM, and SPF verification.
+Authopsy is an Outlook add-in that analyzes email authentication status including DMARC, DKIM, and SPF verification by checking email headers.
 
 ## Features
 
-- **DMARC Analysis**: Verifies DMARC authentication status
-- **DKIM Verification**: Checks DKIM signature validation
-- **SPF Authentication**: Analyzes SPF record compliance
-- **Visual Indicators**: Clear pass/fail/unknown status with icons
-- **Detailed Information**: Click on any result to see detailed explanations
-- **Works Everywhere**: Compatible with Outlook Web, Outlook Desktop, and Outlook Mobile
+- **📊 Header Analysis**: Analyzes email headers for authentication information
+- **🔍 DMARC Analysis**: Verifies DMARC authentication status
+- **🔐 DKIM Verification**: Checks DKIM signature validation
+- **📧 SPF Authentication**: Analyzes SPF record compliance
+- **📋 Dropdown Menu**: Access via dropdown with multiple analysis options
+- **📌 Pinnable Interface**: Can be pinned for quick access in Outlook Web
+- **⚡ Quick Check**: Fast header analysis with summary results
+- **📱 Full Analysis**: Detailed analysis with explanations
+- **🎯 Visual Indicators**: Clear pass/fail/unknown status with icons
+- **🌐 Works Everywhere**: Compatible with Outlook Web, Desktop, and Mobile
 
 ## Installation
 
-### Option 1: Install from Manifest (Sideloading)
+### For Work & School Accounts (Recommended)
 
-1. Download the `manifest.xml` file from this repository
-2. In Outlook Web:
+1. **Download the manifest**: Save the `manifest.xml` file from this repository
+2. **In Outlook Web** (outlook.office.com):
+   - Click the Apps icon (9 dots) → Admin
+   - Go to Settings → Integrated apps
+   - Click "Upload custom apps" → "Upload from file"
+   - Select the `manifest.xml` file
+3. **In Outlook Desktop**:
+   - Go to File → Manage Add-ins → "My add-ins"
+   - Click "Add a custom add-in" → "Add from file"
+   - Select the `manifest.xml` file
+
+### For Personal Accounts
+
+1. **In Outlook Web**:
    - Go to Settings (gear icon) → View all Outlook settings
    - Navigate to Mail → Manage add-ins
-   - Click "Add from file" and upload the manifest.xml
-3. In Outlook Desktop:
-   - Go to File → Manage Add-ins
-   - Click "My add-ins" → "Add a custom add-in" → "Add from file"
-   - Select the manifest.xml file
+   - Click "Add from file" and upload `manifest.xml`
+2. **In Outlook Desktop**:
+   - File → Manage Add-ins → My add-ins
+   - Add custom add-in → From file → Select `manifest.xml`
 
-### Option 2: Direct URL Installation
+### Direct URL Installation
 
-Use this URL to install directly: `https://rdyy89.github.io/authopsy-addin/manifest.xml`
+For advanced users: `https://rdyy89.github.io/authopsy-addin/manifest.xml`
 
 ## Usage
 
+### Method 1: Dropdown Menu (Recommended)
 1. Open any received email in Outlook
-2. Click the "Authopsy" button in the ribbon or add-in panel
-3. The add-in will analyze the email headers and display:
-   - DMARC status with icon
-   - DKIM status with icon  
-   - SPF status with icon
-4. Click the "Details" button next to any result for more information
+2. Click the "Authopsy" dropdown button in the ribbon
+3. Choose from:
+   - **Full Analysis**: Opens detailed panel with explanations
+   - **Quick Check**: Shows summary in notification
+
+### Method 2: Pinned Panel
+1. Right-click the "Authopsy" button
+2. Select "Pin" to keep the panel always visible
+3. Click any email to automatically analyze headers
+
+### What You'll See
+
+The add-in displays:
+- 🟢 **DMARC**: Pass/Fail/Unknown status with detailed explanation
+- 🔐 **DKIM**: Signature verification status with details
+- 📧 **SPF**: Sender authentication status with explanation
+- 📊 **Summary Score**: X/3 checks passed
+- 💡 **Click Details**: Get technical explanations for each result
 
 ## Status Icons
 
-- 🟢 **Pass**: Authentication succeeded
-- 🔴 **Fail**: Authentication failed
-- 🟡 **Unknown**: Status could not be determined
+- 🟢 **Pass**: Authentication succeeded - email is legitimate
+- 🔴 **Fail**: Authentication failed - potential security risk
+- 🟡 **Unknown**: Status could not be determined - investigate further
 
-## Technical Details
+## Header Analysis Details
 
-This add-in analyzes email headers including:
-- `Authentication-Results`
-- `ARC-Authentication-Results`
-- `X-MS-Exchange-Authentication-Results`
-- `DKIM-Signature`
-- `Received-SPF`
+This add-in analyzes the following email headers:
+- `Authentication-Results` - Primary authentication results
+- `ARC-Authentication-Results` - Authenticated Received Chain results  
+- `X-MS-Exchange-Authentication-Results` - Microsoft Exchange results
+- `DKIM-Signature` - Digital signature information
+- `Received-SPF` - SPF validation results
+
+### What Each Check Means:
+- **DMARC**: Domain-based Message Authentication, Reporting & Conformance
+- **DKIM**: DomainKeys Identified Mail (digital signature)
+- **SPF**: Sender Policy Framework (IP authorization)
+
+## Troubleshooting
+
+### Installation Issues
+- **Work Account**: Use admin installation method through IT department
+- **Permission Error**: Ensure you have rights to install add-ins
+- **Manifest Error**: Check that manifest.xml downloaded completely
+
+### Analysis Issues  
+- **No Results**: Email may not have authentication headers
+- **Unknown Status**: Headers present but results unclear
+- **Error Message**: Select a received email (not sent items)
 
 ## Development
 
@@ -64,6 +109,8 @@ npm start
 ```
 
 The add-in will be served at `http://localhost:3000`
+
+For testing, update manifest URLs to localhost before installation.
 
 ### File Structure
 

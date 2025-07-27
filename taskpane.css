@@ -52,6 +52,20 @@ body {
     margin-bottom: 20px;
 }
 
+.pin-info {
+    background-color: #f8f9fa;
+    border: 1px solid #e1dfdd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 15px;
+    text-align: left;
+}
+
+.pin-info p {
+    margin: 0;
+    line-height: 1.4;
+}
+
 /* Loading Styles */
 .loading-container {
     display: flex;
@@ -233,6 +247,11 @@ body {
 
 .ms-font-m {
     font-size: 14px;
+    font-weight: 400;
+}
+
+.ms-font-s {
+    font-size: 12px;
     font-weight: 400;
 }
 
