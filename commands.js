@@ -126,25 +126,55 @@
     }
   }
   
-  // Show results - SIMPLIFIED approach
+  // Show results - DEBUG VERSION
   function showResult(title, content) {
     console.log("=== " + title + " ===");
     console.log(content);
     console.log("===============");
     
-    // Try ONE simple notification without all the complex cleanup
+    // DEBUG: Check what APIs are available
+    console.log("Office.context available:", !!Office.context);
+    console.log("Office.context.mailbox available:", !!Office.context.mailbox);
+    console.log("Office.context.mailbox.item available:", !!Office.context.mailbox.item);
+    console.log("notificationMessages available:", !!Office.context.mailbox.item.notificationMessages);
+    
+    // Try multiple notification approaches
     try {
       if (Office.context.mailbox.item.notificationMessages) {
-        const simpleKey = "authopsy_" + Math.random().toString(36).substr(2, 5);
+        const simpleKey = "authopsy_debug_" + Date.now();
+        console.log("Attempting notification with key:", simpleKey);
         
         Office.context.mailbox.item.notificationMessages.addAsync(simpleKey, {
           type: "informationalMessage",
-          message: title + ": " + content.substring(0, 100),
-          persistent: false
+          message: title + ": " + content.substring(0, 80) + "...",
+          persistent: true  // Make it stick around
+        }, function(result) {
+          console.log("Notification result:", result);
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Notification failed:", result.error);
+            console.error("Error name:", result.error.name);
+            console.error("Error message:", result.error.message);
+            console.error("Error code:", result.error.code);
+          } else {
+            console.log("✅ Notification added successfully!");
+            
+            // Auto-remove after 8 seconds for testing
+            setTimeout(function() {
+              Office.context.mailbox.item.notificationMessages.removeAsync(simpleKey, function(removeResult) {
+                console.log("Notification removal result:", removeResult);
+              });
+            }, 8000);
+          }
         });
+      } else {
+        console.error("❌ notificationMessages API not available");
+        console.log("Available APIs:", Object.keys(Office.context.mailbox.item));
       }
     } catch (error) {
-      console.log("Notification failed, but result is in console");
+      console.error("❌ Exception in showResult:", error);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
     }
   }
   

@@ -104,6 +104,22 @@
                         <FunctionName>showSpfDetails</FunctionName>
                       </Action>
                     </Item>
+                    <Item id="openTaskPane">
+                      <Label resid="TaskPaneLabel" />
+                      <Supertip>
+                        <Title resid="TaskPaneSuperTipTitle" />
+                        <Description resid="TaskPaneSuperTipDesc" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16" />
+                        <bt:Image size="32" resid="Icon.32x32" />
+                        <bt:Image size="80" resid="Icon.80x80" />
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>ButtonId1</TaskpaneId>
+                        <SourceLocation resid="Taskpane.Url" />
+                      </Action>
+                    </Item>
                   </Items>
                 </Control>
               </Group>
@@ -120,6 +136,7 @@
       </bt:Images>
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Authopsy Tools" />
@@ -131,12 +148,15 @@
         <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Analysis" />
         <bt:String id="SpfLabel" DefaultValue="SPF" />
         <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Analysis" />
+        <bt:String id="TaskPaneLabel" DefaultValue="Open Panel" />
+        <bt:String id="TaskPaneSuperTipTitle" DefaultValue="Open Analysis Panel" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="MenuSuperTipDescription" DefaultValue="Analyze email headers for authentication status." />
         <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details." />
         <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM signature verification details." />
         <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details." />
+        <bt:String id="TaskPaneSuperTipDesc" DefaultValue="Open the full analysis panel with detailed results." />
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
