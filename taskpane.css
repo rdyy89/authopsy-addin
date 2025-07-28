@@ -66,6 +66,62 @@ body {
     line-height: 1.4;
 }
 
+.quick-actions {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.quick-btn {
+    background-color: #0078d4;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    margin: 0 5px;
+}
+
+.quick-btn:hover {
+    background-color: #106ebe;
+}
+
+/* Quick notification styles */
+.quick-notification {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-line;
+    display: none;
+}
+
+.quick-notification.success {
+    background-color: #dff6dd;
+    border: 1px solid #107c10;
+    color: #107c10;
+}
+
+.quick-notification.error {
+    background-color: #fde7e9;
+    border: 1px solid #d13438;
+    color: #d13438;
+}
+
+.quick-notification.warning {
+    background-color: #fff4ce;
+    border: 1px solid #ff8c00;
+    color: #ff8c00;
+}
+
+.quick-notification.info {
+    background-color: #deecf9;
+    border: 1px solid #0078d4;
+    color: #0078d4;
+}
+
 /* Loading Styles */
 .loading-container {
     display: flex;

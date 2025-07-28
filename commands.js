@@ -1,176 +1,160 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
+// filepath: d:\github\authopsy-addin\commands.js
+(function () {
+  "use strict";
 
-/* global Office */
-
-Office.onReady(() => {
-  // If needed, Office.onReady() can be called here to perform
-  // initialization that is required after the Office.js library is loaded.
-  console.log('Authopsy commands loaded');
-});
-
-/**
- * Shows a notification when the add-in command is executed.
- * @param event {Office.AddinCommands.Event}
- */
-function action(event) {
-  const message = {
-    type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
-    message: "Authopsy add-in command executed successfully.",
-    icon: "Icon.80x80",
-    persistent: true
+  let _headerResults = {};
+  let _messageId = "";
+  
+  // The Office initialize function must be run each time a new page is loaded
+  Office.initialize = function (reason) {
+    // If needed, add page initialization code here
   };
 
-  // Show a notification message
-  Office.context.mailbox.item.notificationMessages.replaceAsync("action", message);
-
-  // Be sure to indicate when the add-in command function is complete
-  event.completed();
-}
-
-/**
- * Quick analysis function for dropdown menu
- * @param event {Office.AddinCommands.Event}
- */
-function quickAnalysis(event) {
-  try {
-    // Get the current item (email)
-    const item = Office.context.mailbox.item;
-    
-    if (!item) {
-      showNotification("Error: No email selected", "error", event);
-      return;
-    }
-
-    // Show loading notification
-    showNotification("Analyzing email headers...", "informational", event, false);
-
-    // Get internet headers for quick analysis
-    item.internetHeaders.getAsync(
-      [
-        'Authentication-Results',
-        'ARC-Authentication-Results', 
-        'Received-SPF',
-        'DKIM-Signature',
-        'X-MS-Exchange-Authentication-Results'
-      ],
-      (asyncResult) => {
-        if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-          const headers = asyncResult.value;
-          const results = quickAnalyzeHeaders(headers);
-          showNotification(results, "informational", event);
+  // Helper function to parse email headers
+  function parseEmailHeaders(callback) {
+    Office.context.mailbox.item.getAllInternetHeadersAsync(function (result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        const headers = result.value;
+        _messageId = Office.context.mailbox.item.itemId;
+        
+        // Parse DMARC results
+        const dmarcResult = parseDmarcResult(headers);
+        
+        // Parse DKIM results
+        const dkimResult = parseDkimResult(headers);
+        
+        // Parse SPF results
+        const spfResult = parseSpfResult(headers);
+        
+        _headerResults = {
+          dmarc: dmarcResult,
+          dkim: dkimResult,
+          spf: spfResult
+        };
+        
+        callback(_headerResults);
+      } else {
+        console.error("Failed to get headers: " + result.error.message);
+        callback({
+          dmarc: { status: "unknown", details: "Error retrieving headers" },
+          dkim: { status: "unknown", details: "Error retrieving headers" },
+          spf: { status: "unknown", details: "Error retrieving headers" }
+        });
+      }
+    });
+  }
+  
+  // Parse DMARC result from headers
+  function parseDmarcResult(headers) {
+    try {
+      // Look for Authentication-Results header with dmarc
+      const dmarcRegex = /Authentication-Results:.*dmarc=([^;]+)/i;
+      const dmarcMatch = headers.match(dmarcRegex);
+      
+      if (dmarcMatch && dmarcMatch[1]) {
+        const result = dmarcMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "DMARC authentication passed: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "DMARC authentication failed: " + result };
         } else {
-          showNotification("Quick Analysis: Headers not accessible. Use Full Analysis for complete results.", "informational", event);
+          return { status: "unknown", details: "DMARC result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No DMARC results found in headers" };
+    } catch (error) {
+      console.error("Error parsing DMARC:", error);
+      return { status: "unknown", details: "Error parsing DMARC results" };
+    }
+  }
+  
+  // Parse DKIM result from headers
+  function parseDkimResult(headers) {
+    try {
+      // Look for Authentication-Results header with dkim
+      const dkimRegex = /Authentication-Results:.*dkim=([^;]+)/i;
+      const dkimMatch = headers.match(dkimRegex);
+      
+      if (dkimMatch && dkimMatch[1]) {
+        const result = dkimMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "DKIM signature verified: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "DKIM signature verification failed: " + result };
+        } else {
+          return { status: "unknown", details: "DKIM result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No DKIM results found in headers" };
+    } catch (error) {
+      console.error("Error parsing DKIM:", error);
+      return { status: "unknown", details: "Error parsing DKIM results" };
+    }
+  }
+  
+  // Parse SPF result from headers
+  function parseSpfResult(headers) {
+    try {
+      // Look for Authentication-Results header with spf
+      const spfRegex = /Authentication-Results:.*spf=([^;]+)/i;
+      const spfMatch = headers.match(spfRegex);
+      
+      if (spfMatch && spfMatch[1]) {
+        const result = spfMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "SPF check passed: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "SPF check failed: " + result };
+        } else {
+          return { status: "unknown", details: "SPF result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No SPF results found in headers" };
+    } catch (error) {
+      console.error("Error parsing SPF:", error);
+      return { status: "unknown", details: "Error parsing SPF results" };
+    }
+  }
+  
+  // Show dialog with details
+  function showDialog(title, content) {
+    Office.context.ui.displayDialogAsync(
+      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
+      encodeURIComponent(title) + 
+      "&content=" + 
+      encodeURIComponent(content),
+      { height: 30, width: 20, displayInIframe: true },
+      function (result) {
+        if (result.status === Office.AsyncResultStatus.Failed) {
+          console.error("Dialog creation failed: " + result.error.message);
         }
       }
     );
-
-  } catch (error) {
-    console.error('Error in quickAnalysis function:', error);
-    showNotification("Error: Unable to analyze email headers", "error", event);
-  }
-}
-
-function quickAnalyzeHeaders(headers) {
-  let results = "📧 Header Analysis:\n";
-  let authPassed = 0;
-  let totalChecks = 0;
-
-  // Parse Authentication-Results header
-  const authResultsHeader = headers['Authentication-Results'] || headers['ARC-Authentication-Results'] || headers['X-MS-Exchange-Authentication-Results'];
-  
-  if (authResultsHeader) {
-    const authText = authResultsHeader.toLowerCase();
-    
-    // Check DMARC
-    totalChecks++;
-    if (authText.includes('dmarc=pass')) {
-      results += "✅ DMARC: Pass\n";
-      authPassed++;
-    } else if (authText.includes('dmarc=fail')) {
-      results += "❌ DMARC: Fail\n";
-    } else if (authText.includes('dmarc=')) {
-      results += "⚠️ DMARC: Unknown\n";
-    } else {
-      results += "⚠️ DMARC: Not found\n";
-    }
-
-    // Check DKIM
-    totalChecks++;
-    if (authText.includes('dkim=pass')) {
-      results += "✅ DKIM: Pass\n";
-      authPassed++;
-    } else if (authText.includes('dkim=fail')) {
-      results += "❌ DKIM: Fail\n";
-    } else if (authText.includes('dkim=')) {
-      results += "⚠️ DKIM: Unknown\n";
-    } else if (headers['DKIM-Signature']) {
-      results += "⚠️ DKIM: Signature present\n";
-    } else {
-      results += "⚠️ DKIM: Not found\n";
-    }
-
-    // Check SPF
-    totalChecks++;
-    if (authText.includes('spf=pass')) {
-      results += "✅ SPF: Pass\n";
-      authPassed++;
-    } else if (authText.includes('spf=fail')) {
-      results += "❌ SPF: Fail\n";
-    } else if (authText.includes('spf=')) {
-      results += "⚠️ SPF: Unknown\n";
-    } else {
-      results += "⚠️ SPF: Not found\n";
-    }
-  } else {
-    results += "⚠️ No authentication headers found\n";
-  }
-
-  // Add summary
-  if (totalChecks > 0) {
-    results += `\n📊 Score: ${authPassed}/${totalChecks} passed`;
   }
   
-  results += "\n\n💡 Use 'Full Analysis' for detailed explanations";
-
-  return results;
-}
-
-function showNotification(message, type, event, complete = true) {
-  const notificationType = type === "error" ? 
-    Office.MailboxEnums.ItemNotificationMessageType.ErrorMessage :
-    Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage;
-
-  const notification = {
-    type: notificationType,
-    message: message,
-    icon: "Icon.80x80",
-    persistent: true
-  };
-
-  // Show the notification
-  Office.context.mailbox.item.notificationMessages.replaceAsync("quickAnalysis", notification);
-
-  // Complete the event if requested
-  if (complete && event) {
-    event.completed();
+  // Handler for DMARC details
+  function showDmarcDetails() {
+    parseEmailHeaders(function(results) {
+      showDialog("DMARC Details", results.dmarc.details);
+    });
   }
-}
+  
+  // Handler for DKIM details
+  function showDkimDetails() {
+    parseEmailHeaders(function(results) {
+      showDialog("DKIM Details", results.dkim.details);
+    });
+  }
+  
+  // Handler for SPF details
+  function showSpfDetails() {
+    parseEmailHeaders(function(results) {
+      showDialog("SPF Details", results.spf.details);
+    });
+  }
 
-function getGlobal() {
-  return typeof self !== "undefined"
-    ? self
-    : typeof window !== "undefined"
-    ? window
-    : typeof global !== "undefined"
-    ? global
-    : undefined;
-}
-
-const g = getGlobal();
-
-// The add-in command functions need to be available in global scope
-g.action = action;
-g.quickAnalysis = quickAnalysis;
+  // Register functions
+  Office.actions.associate("showDmarcDetails", showDmarcDetails);
+  Office.actions.associate("showDkimDetails", showDkimDetails);
+  Office.actions.associate("showSpfDetails", showSpfDetails);
+})();

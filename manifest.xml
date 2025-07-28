@@ -11,7 +11,7 @@
   <ProviderName>Authopsy</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Authopsy"/>
-  <Description DefaultValue="Email authentication analyzer for DMARC, DKIM, and SPF - checks email headers"/>
+  <Description DefaultValue="Email authentication analyzer for DMARC, DKIM, and SPF"/>
   <IconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
   <HighResolutionIconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
   <SupportUrl DefaultValue="https://github.com/rdyy89/authopsy-addin"/>
@@ -24,7 +24,7 @@
   <!-- Requirements -->
   <Requirements>
     <Sets>
-      <Set Name="Mailbox" MinVersion="1.5" />
+      <Set Name="Mailbox" MinVersion="1.1" />
     </Sets>
   </Requirements>
 
@@ -33,167 +33,147 @@
     <Form xsi:type="ItemRead">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>300</RequestedHeight>
+        <RequestedHeight>350</RequestedHeight>
       </DesktopSettings>
+      <TabletSettings>
+        <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
+        <RequestedHeight>350</RequestedHeight>
+      </TabletSettings>
+      <PhoneSettings>
+        <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
+        <RequestedHeight>350</RequestedHeight>
+      </PhoneSettings>
     </Form>
   </FormSettings>
 
   <!-- Permissions -->
   <Permissions>ReadItem</Permissions>
 
-  <!-- Begin Add-in Commands Mode integration -->
+  <!-- Rule -->
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="ReadOrEdit" />
+    <Rule xsi:type="ItemHasAttachment" />
+    <Rule xsi:type="ItemHasRegularExpressionMatch" RegExName="HeaderCheck" RegExValue=".*" PropertyName="InternetHeaders" />
+  </Rule>
+
+  <!-- Regular expressions for rules -->
+  <RegExCollection>
+    <RegEx Name="HeaderCheck" Value="." IgnoreCase="true" />
+  </RegExCollection>
+
+  <!-- VERSION OVERRIDES - ADD DROPDOWN MENU -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
-    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+    <Requirements>
+      <bt:Sets>
+        <bt:Set Name="Mailbox" MinVersion="1.3" />
+      </bt:Sets>
+    </Requirements>
 
-      <!-- Requirements -->
-      <Requirements>
-        <bt:Sets DefaultMinVersion="1.5">
-          <bt:Set Name="Mailbox" />
-        </bt:Sets>
-      </Requirements>
-
-      <!-- Hosts -->
-      <Hosts>
-        <Host xsi:type="MailHost">
-          <!-- Event-based activation -->
-          <DesktopFormFactor>
-            <!-- Location of the code file for the add-in. -->
-            <GetStarted>
-              <Title resid="GetStartedTitle"/>
-              <Description resid="GetStartedDescription"/>
-              <LearnMoreUrl resid="GetStartedLearnMoreUrl"/>
-            </GetStarted>
-
-            <!-- Function file is a HTML page that includes the JavaScript file for the add-in -->
-            <FunctionFile resid="Commands.Url" />
-
-            <!-- Extension point for message read surface -->
-            <ExtensionPoint xsi:type="MessageReadCommandSurface">
-              <OfficeTab id="TabDefault">
-                <Group id="msgReadGroup">
-                  <Label resid="GroupLabel" />
-                  <!-- Dropdown Menu Control -->
-                  <Control xsi:type="Menu" id="msgReadMenuButton">
-                    <Label resid="MenuButton.Label" />
-                    <Supertip>
-                      <Title resid="MenuButton.Label" />
-                      <Description resid="MenuButton.Tooltip" />
-                    </Supertip>
-                    <Icon>
-                      <bt:Image size="16" resid="Icon.16x16" />
-                      <bt:Image size="32" resid="Icon.32x32" />
-                      <bt:Image size="80" resid="Icon.80x80" />
-                    </Icon>
-                    <Items>
-                      <Item id="msgReadMenuItem1">
-                        <Label resid="MenuItem1.Label" />
-                        <Supertip>
-                          <Title resid="MenuItem1.Label" />
-                          <Description resid="MenuItem1.Tooltip" />
-                        </Supertip>
-                        <Icon>
-                          <bt:Image size="16" resid="Icon.16x16" />
-                          <bt:Image size="32" resid="Icon.32x32" />
-                          <bt:Image size="80" resid="Icon.80x80" />
-                        </Icon>
-                        <Action xsi:type="ShowTaskpane">
-                          <TaskpaneId>ButtonId1</TaskpaneId>
-                          <SourceLocation resid="Taskpane.Url" />
-                        </Action>
-                      </Item>
-                      <Item id="msgReadMenuItem2">
-                        <Label resid="MenuItem2.Label" />
-                        <Supertip>
-                          <Title resid="MenuItem2.Label" />
-                          <Description resid="MenuItem2.Tooltip" />
-                        </Supertip>
-                        <Icon>
-                          <bt:Image size="16" resid="QuickIcon.16x16" />
-                          <bt:Image size="32" resid="QuickIcon.32x32" />
-                          <bt:Image size="80" resid="QuickIcon.80x80" />
-                        </Icon>
-                        <Action xsi:type="ExecuteFunction">
-                          <FunctionName>quickAnalysis</FunctionName>
-                        </Action>
-                      </Item>
-                    </Items>
-                  </Control>
-                </Group>
-              </OfficeTab>
-            </ExtensionPoint>
-
-            <!-- Extension point for pinnable taskpane -->
-            <ExtensionPoint xsi:type="PinnadleTaskpane">
-              <TaskpaneId>ButtonId1</TaskpaneId>
-              <SourceLocation resid="Taskpane.Url" />
-            </ExtensionPoint>
-          </DesktopFormFactor>
-
-          <!-- Mobile form factor -->
-          <MobileFormFactor>
-            <FunctionFile resid="Commands.Url" />
-            <ExtensionPoint xsi:type="MobileMessageReadCommandSurface">
-              <Group id="mobileMsgRead">
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <!-- Message Read -->
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="msgReadGroup">
                 <Label resid="GroupLabel" />
-                <Control xsi:type="MobileButton" id="TaskPaneBtn">
-                  <Label resid="TaskpaneButton.Label" />
-                  <Icon xsi:type="bt:MobileIconList">
-                    <bt:Image size="25" scale="1" resid="Icon.25x25" />
-                    <bt:Image size="25" scale="2" resid="Icon.50x50" />
-                    <bt:Image size="25" scale="3" resid="Icon.75x75" />
-                    <bt:Image size="32" scale="1" resid="Icon.32x32" />
-                    <bt:Image size="32" scale="2" resid="Icon.32x32" />
-                    <bt:Image size="32" scale="3" resid="Icon.32x32" />
-                    <bt:Image size="48" scale="1" resid="Icon.48x48" />
-                    <bt:Image size="48" scale="2" resid="Icon.48x48" />
-                    <bt:Image size="48" scale="3" resid="Icon.48x48" />
+                <Control xsi:type="Menu" id="msgReadMenuButton">
+                  <Label resid="MenuButtonLabel" />
+                  <Supertip>
+                    <Title resid="MenuSuperTipTitle" />
+                    <Description resid="MenuSuperTipDescription" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
                   </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>ButtonId1</TaskpaneId>
-                    <SourceLocation resid="Taskpane.Url" />
-                  </Action>
+                  <Items>
+                    <Item id="dmarcItem">
+                      <Label resid="DmarcLabel" />
+                      <Supertip>
+                        <Title resid="DmarcSuperTipTitle" />
+                        <Description resid="DmarcSuperTipDesc" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16" />
+                        <bt:Image size="32" resid="Icon.32x32" />
+                        <bt:Image size="80" resid="Icon.80x80" />
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>showDmarcDetails</FunctionName>
+                      </Action>
+                    </Item>
+                    <Item id="dkimItem">
+                      <Label resid="DkimLabel" />
+                      <Supertip>
+                        <Title resid="DkimSuperTipTitle" />
+                        <Description resid="DkimSuperTipDesc" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16" />
+                        <bt:Image size="32" resid="Icon.32x32" />
+                        <bt:Image size="80" resid="Icon.80x80" />
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>showDkimDetails</FunctionName>
+                      </Action>
+                    </Item>
+                    <Item id="spfItem">
+                      <Label resid="SpfLabel" />
+                      <Supertip>
+                        <Title resid="SpfSuperTipTitle" />
+                        <Description resid="SpfSuperTipDesc" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16" />
+                        <bt:Image size="32" resid="Icon.32x32" />
+                        <bt:Image size="80" resid="Icon.80x80" />
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>showSpfDetails</FunctionName>
+                      </Action>
+                    </Item>
+                  </Items>
                 </Control>
               </Group>
-            </ExtensionPoint>
-          </MobileFormFactor>
-        </Host>
-      </Hosts>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
 
-      <!-- Resources -->
-      <Resources>
-        <bt:Images>
-          <bt:Image id="Icon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.25x25" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.48x48" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.50x50" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.75x75" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-          <bt:Image id="QuickIcon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/unknown.png"/>
-          <bt:Image id="QuickIcon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/unknown.png"/>
-          <bt:Image id="QuickIcon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/unknown.png"/>
-        </bt:Images>
-        <bt:Urls>
-          <bt:Url id="GetStartedLearnMoreUrl" DefaultValue="https://github.com/rdyy89/authopsy-addin" />
-          <bt:Url id="Commands.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/commands.html" />
-          <bt:Url id="Taskpane.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html" />
-        </bt:Urls>
-        <bt:ShortStrings>
-          <bt:String id="GetStartedTitle" DefaultValue="Get started with Authopsy!" />
-          <bt:String id="GroupLabel" DefaultValue="Authopsy" />
-          <bt:String id="TaskpaneButton.Label" DefaultValue="Authopsy" />
-          <bt:String id="MenuButton.Label" DefaultValue="Authopsy" />
-          <bt:String id="MenuItem1.Label" DefaultValue="Full Analysis" />
-          <bt:String id="MenuItem2.Label" DefaultValue="Quick Check" />
-        </bt:ShortStrings>
-        <bt:LongStrings>
-          <bt:String id="GetStartedDescription" DefaultValue="Analyze email authentication status with Authopsy - checks DMARC, DKIM, and SPF headers." />
-          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open Authopsy analysis panel" />
-          <bt:String id="MenuButton.Tooltip" DefaultValue="Click to access Authopsy email authentication tools - can be pinned for quick access" />
-          <bt:String id="MenuItem1.Tooltip" DefaultValue="Open full analysis panel to check DMARC, DKIM, and SPF with detailed explanations" />
-          <bt:String id="MenuItem2.Tooltip" DefaultValue="Quick header check - shows authentication status in notification" />
-        </bt:LongStrings>
-      </Resources>
-    </VersionOverrides>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GroupLabel" DefaultValue="Authopsy"/>
+        <bt:String id="MenuButtonLabel" DefaultValue="Authopsy"/>
+        <bt:String id="MenuSuperTipTitle" DefaultValue="Authopsy"/>
+        <bt:String id="DmarcLabel" DefaultValue="DMARC: Loading..."/>
+        <bt:String id="DmarcSuperTipTitle" DefaultValue="DMARC Authentication"/>
+        <bt:String id="DkimLabel" DefaultValue="DKIM: Loading..."/>
+        <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Authentication"/>
+        <bt:String id="SpfLabel" DefaultValue="SPF: Loading..."/>
+        <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Authentication"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="MenuSuperTipDescription" DefaultValue="Check email authentication status including DMARC, DKIM, and SPF."/>
+        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details for this email."/>
+        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM authentication details for this email."/>
+        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details for this email."/>
+      </bt:LongStrings>
+    </Resources>
+
+    <!-- Function command add-in integration -->
+    <FunctionFile resid="Commands.Url"/>
   </VersionOverrides>
 </OfficeApp>

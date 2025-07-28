@@ -1,223 +1,225 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
+(function () {
+  "use strict";
 
-/* global document, Office */
+  let _headerResults = {};
+  let _messageId = "";
 
-Office.onReady((info) => {
-  if (info.host === Office.HostType.Outlook) {
-    document.addEventListener("DOMContentLoaded", () => {
-      // Initialize the add-in
-      run();
-      setupEventListeners();
+  // The Office initialize function must be run each time a new page is loaded
+  Office.initialize = function (reason) {
+    $(document).ready(function () {
+      // Set up event handlers
+      $("#dmarcDetails").click(showDmarcDetails);
+      $("#dkimDetails").click(showDkimDetails);
+      $("#spfDetails").click(showSpfDetails);
+      
+      // Start the analysis
+      analyzeEmailHeaders();
+    });
+  };
+
+  // Main function to analyze email headers
+  function analyzeEmailHeaders() {
+    // Set status to loading
+    updateUIStatus("loading");
+    
+    // Get email headers
+    Office.context.mailbox.item.getAllInternetHeadersAsync(function (result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        const headers = result.value;
+        _messageId = Office.context.mailbox.item.itemId;
+        
+        // Parse results
+        const dmarcResult = parseDmarcResult(headers);
+        const dkimResult = parseDkimResult(headers);
+        const spfResult = parseSpfResult(headers);
+        
+        // Store results
+        _headerResults = {
+          dmarc: dmarcResult,
+          dkim: dkimResult,
+          spf: spfResult
+        };
+        
+        // Update UI with results
+        updateUIWithResults(_headerResults);
+      } else {
+        console.error("Failed to get headers: " + result.error.message);
+        handleError("Could not retrieve email headers.");
+      }
     });
   }
-});
-
-function setupEventListeners() {
-  // Setup modal close functionality
-  const modal = document.getElementById('detailsModal');
-  const closeBtn = document.getElementsByClassName('close')[0];
   
-  closeBtn.onclick = function() {
-    modal.style.display = 'none';
-  };
-  
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = 'none';
+  // Update UI based on loading status
+  function updateUIStatus(status) {
+    if (status === "loading") {
+      $("#dmarcStatus").text("Loading...").addClass("loading");
+      $("#dkimStatus").text("Loading...").addClass("loading");
+      $("#spfStatus").text("Loading...").addClass("loading");
+      
+      $("#dmarcIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
+      $("#dkimIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
+      $("#spfIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
     }
-  };
-
-  // Setup details button listeners
-  document.getElementById('dmarc-details').addEventListener('click', () => {
-    showDetails('DMARC', window.authResults?.dmarc?.details || 'No details available');
-  });
+  }
   
-  document.getElementById('dkim-details').addEventListener('click', () => {
-    showDetails('DKIM', window.authResults?.dkim?.details || 'No details available');
-  });
-  
-  document.getElementById('spf-details').addEventListener('click', () => {
-    showDetails('SPF', window.authResults?.spf?.details || 'No details available');
-  });
-}
-
-function showDetails(title, content) {
-  document.getElementById('modal-title').textContent = `${title} Details`;
-  document.getElementById('modal-content').textContent = content;
-  document.getElementById('detailsModal').style.display = 'block';
-}
-
-async function run() {
-  try {
-    // Show loading state
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('error').style.display = 'none';
-
-    // Get the current item (email)
-    const item = Office.context.mailbox.item;
+  // Update UI with analysis results
+  function updateUIWithResults(results) {
+    // Update DMARC
+    updateStatusElement("dmarc", results.dmarc.status, getStatusText(results.dmarc.status));
     
-    if (!item) {
-      showError();
-      return;
+    // Update DKIM
+    updateStatusElement("dkim", results.dkim.status, getStatusText(results.dkim.status));
+    
+    // Update SPF
+    updateStatusElement("spf", results.spf.status, getStatusText(results.spf.status));
+  }
+  
+  // Helper function to update status element
+  function updateStatusElement(type, status, text) {
+    const statusElement = $("#" + type + "Status");
+    const iconElement = $("#" + type + "Icon");
+    
+    // Remove all classes and add the status class
+    statusElement.removeClass("loading pass fail unknown").addClass(status);
+    
+    // Set the text
+    statusElement.text(text);
+    
+    // Update icon
+    iconElement.attr("src", "https://rdyy89.github.io/authopsy-addin/icons/" + status + ".png");
+  }
+  
+  // Get status text from status code
+  function getStatusText(status) {
+    switch(status) {
+      case "pass": return "Pass";
+      case "fail": return "Fail";
+      case "unknown": return "Unknown";
+      default: return "Unknown";
     }
-
-    // Get internet headers
-    item.internetHeaders.getAsync(
-      [
-        'Authentication-Results',
-        'ARC-Authentication-Results', 
-        'Received-SPF',
-        'DKIM-Signature',
-        'X-MS-Exchange-Authentication-Results'
-      ],
-      (asyncResult) => {
-        if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-          const headers = asyncResult.value;
-          analyzeHeaders(headers);
+  }
+  
+  // Parse DMARC result from headers
+  function parseDmarcResult(headers) {
+    try {
+      // Look for Authentication-Results header with dmarc
+      const dmarcRegex = /Authentication-Results:.*dmarc=([^;]+)/i;
+      const dmarcMatch = headers.match(dmarcRegex);
+      
+      if (dmarcMatch && dmarcMatch[1]) {
+        const result = dmarcMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "DMARC authentication passed: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "DMARC authentication failed: " + result };
         } else {
-          // Fallback: try to get basic email properties and simulate analysis
-          simulateAnalysis();
+          return { status: "unknown", details: "DMARC result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No DMARC results found in headers" };
+    } catch (error) {
+      console.error("Error parsing DMARC:", error);
+      return { status: "unknown", details: "Error parsing DMARC results" };
+    }
+  }
+  
+  // Parse DKIM result from headers
+  function parseDkimResult(headers) {
+    try {
+      // Look for Authentication-Results header with dkim
+      const dkimRegex = /Authentication-Results:.*dkim=([^;]+)/i;
+      const dkimMatch = headers.match(dkimRegex);
+      
+      if (dkimMatch && dkimMatch[1]) {
+        const result = dkimMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "DKIM signature verified: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "DKIM signature verification failed: " + result };
+        } else {
+          return { status: "unknown", details: "DKIM result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No DKIM results found in headers" };
+    } catch (error) {
+      console.error("Error parsing DKIM:", error);
+      return { status: "unknown", details: "Error parsing DKIM results" };
+    }
+  }
+  
+  // Parse SPF result from headers
+  function parseSpfResult(headers) {
+    try {
+      // Look for Authentication-Results header with spf
+      const spfRegex = /Authentication-Results:.*spf=([^;]+)/i;
+      const spfMatch = headers.match(spfRegex);
+      
+      if (spfMatch && spfMatch[1]) {
+        const result = spfMatch[1].toLowerCase().trim();
+        if (result.includes("pass")) {
+          return { status: "pass", details: "SPF check passed: " + result };
+        } else if (result.includes("fail") || result.includes("none")) {
+          return { status: "fail", details: "SPF check failed: " + result };
+        } else {
+          return { status: "unknown", details: "SPF result unclear: " + result };
+        }
+      }
+      return { status: "unknown", details: "No SPF results found in headers" };
+    } catch (error) {
+      console.error("Error parsing SPF:", error);
+      return { status: "unknown", details: "Error parsing SPF results" };
+    }
+  }
+  
+  // Handle errors
+  function handleError(message) {
+    $("#dmarcStatus").text("Error").addClass("unknown");
+    $("#dkimStatus").text("Error").addClass("unknown");
+    $("#spfStatus").text("Error").addClass("unknown");
+    
+    console.error("Error: " + message);
+  }
+  
+  // Show dialog with details
+  function showDialog(title, content) {
+    Office.context.ui.displayDialogAsync(
+      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
+      encodeURIComponent(title) + 
+      "&content=" + 
+      encodeURIComponent(content),
+      { height: 30, width: 20, displayInIframe: true },
+      function (result) {
+        if (result.status === Office.AsyncResultStatus.Failed) {
+          console.error("Dialog creation failed: " + result.error.message);
         }
       }
     );
-
-  } catch (error) {
-    console.error('Error in run function:', error);
-    showError();
   }
-}
-
-function analyzeHeaders(headers) {
-  try {
-    const authResults = {
-      dmarc: { status: 'unknown', details: 'DMARC information not found in headers' },
-      dkim: { status: 'unknown', details: 'DKIM information not found in headers' },
-      spf: { status: 'unknown', details: 'SPF information not found in headers' }
-    };
-
-    // Parse Authentication-Results header
-    const authResultsHeader = headers['Authentication-Results'] || headers['ARC-Authentication-Results'] || headers['X-MS-Exchange-Authentication-Results'];
-    
-    if (authResultsHeader) {
-      const authText = authResultsHeader.toLowerCase();
-      
-      // Parse DMARC
-      if (authText.includes('dmarc=pass')) {
-        authResults.dmarc = { status: 'pass', details: 'DMARC authentication passed. The message is from an authorized sender.' };
-      } else if (authText.includes('dmarc=fail')) {
-        authResults.dmarc = { status: 'fail', details: 'DMARC authentication failed. The message may be from an unauthorized sender.' };
-      } else if (authText.includes('dmarc=')) {
-        authResults.dmarc = { status: 'unknown', details: 'DMARC policy found but status unclear. Check sender authenticity.' };
-      }
-
-      // Parse DKIM
-      if (authText.includes('dkim=pass')) {
-        authResults.dkim = { status: 'pass', details: 'DKIM signature verified successfully. Message integrity confirmed.' };
-      } else if (authText.includes('dkim=fail')) {
-        authResults.dkim = { status: 'fail', details: 'DKIM signature verification failed. Message may have been tampered with.' };
-      } else if (authText.includes('dkim=')) {
-        authResults.dkim = { status: 'unknown', details: 'DKIM signature present but verification status unclear.' };
-      }
-
-      // Parse SPF
-      if (authText.includes('spf=pass')) {
-        authResults.spf = { status: 'pass', details: 'SPF authentication passed. Sender IP is authorized to send for this domain.' };
-      } else if (authText.includes('spf=fail')) {
-        authResults.spf = { status: 'fail', details: 'SPF authentication failed. Sender IP is not authorized for this domain.' };
-      } else if (authText.includes('spf=')) {
-        authResults.spf = { status: 'unknown', details: 'SPF record found but authentication status unclear.' };
-      }
+  
+  // Show DMARC details
+  function showDmarcDetails() {
+    if (_headerResults.dmarc) {
+      showDialog("DMARC Details", _headerResults.dmarc.details);
+    } else {
+      showDialog("DMARC Details", "No DMARC information available");
     }
-
-    // Check for DKIM-Signature header
-    if (headers['DKIM-Signature'] && authResults.dkim.status === 'unknown') {
-      authResults.dkim = { status: 'unknown', details: 'DKIM signature present. Unable to verify without authentication results.' };
-    }
-
-    // Check for Received-SPF header
-    const spfHeader = headers['Received-SPF'];
-    if (spfHeader && authResults.spf.status === 'unknown') {
-      const spfText = spfHeader.toLowerCase();
-      if (spfText.includes('pass')) {
-        authResults.spf = { status: 'pass', details: 'SPF check passed based on Received-SPF header.' };
-      } else if (spfText.includes('fail')) {
-        authResults.spf = { status: 'fail', details: 'SPF check failed based on Received-SPF header.' };
-      } else {
-        authResults.spf = { status: 'unknown', details: 'SPF header present but status unclear.' };
-      }
-    }
-
-    displayResults(authResults);
-  } catch (error) {
-    console.error('Error analyzing headers:', error);
-    simulateAnalysis();
   }
-}
-
-function simulateAnalysis() {
-  // For demonstration purposes when headers aren't available
-  // In a real implementation, you might call an external API here
   
-  setTimeout(() => {
-    const authResults = {
-      dmarc: { 
-        status: 'pass', 
-        details: 'DMARC authentication passed. This is a simulated result as detailed header information was not available.' 
-      },
-      dkim: { 
-        status: 'pass', 
-        details: 'DKIM signature verified. This is a simulated result as detailed header information was not available.' 
-      },
-      spf: { 
-        status: 'unknown', 
-        details: 'SPF status could not be determined. This is a simulated result as detailed header information was not available.' 
-      }
-    };
-    
-    displayResults(authResults);
-  }, 2000); // Simulate processing time
-}
-
-function displayResults(authResults) {
-  window.authResults = authResults; // Store for details buttons
+  // Show DKIM details
+  function showDkimDetails() {
+    if (_headerResults.dkim) {
+      showDialog("DKIM Details", _headerResults.dkim.details);
+    } else {
+      showDialog("DKIM Details", "No DKIM information available");
+    }
+  }
   
-  // Hide loading, show results
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('results').style.display = 'block';
-  
-  // Update DMARC
-  updateAuthResult('dmarc', authResults.dmarc);
-  
-  // Update DKIM  
-  updateAuthResult('dkim', authResults.dkim);
-  
-  // Update SPF
-  updateAuthResult('spf', authResults.spf);
-}
-
-function updateAuthResult(type, result) {
-  const statusElement = document.getElementById(`${type}-status`);
-  const iconElement = document.getElementById(`${type}-icon`);
-  const detailsButton = document.getElementById(`${type}-details`);
-  
-  // Update status text
-  statusElement.textContent = result.status.charAt(0).toUpperCase() + result.status.slice(1);
-  statusElement.className = `auth-status ms-font-m ${result.status}`;
-  
-  // Update icon
-  iconElement.src = `icons/${result.status}.png`;
-  iconElement.alt = `${type.toUpperCase()} ${result.status}`;
-  
-  // Show details button
-  detailsButton.style.display = 'inline-block';
-}
-
-function showError() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('error').style.display = 'block';
-}
+  // Show SPF details
+  function showSpfDetails() {
+    if (_headerResults.spf) {
+      showDialog("SPF Details", _headerResults.spf.details);
+    } else {
+      showDialog("SPF Details", "No SPF information available");
+    }
+  }
+})();
