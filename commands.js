@@ -126,170 +126,67 @@
     }
   }
   
-  // Show results using notification messages (more reliable than dialogs)
+  // Show results - SIMPLIFIED approach
   function showResult(title, content) {
-    console.log(title + ": " + content);
+    console.log("=== " + title + " ===");
+    console.log(content);
+    console.log("===============");
     
-    // Generate unique key based on timestamp and type
-    const notificationKey = "authopsy_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
-    
+    // Try ONE simple notification without all the complex cleanup
     try {
-      // Try notification first (more reliable in Outlook Web)
       if (Office.context.mailbox.item.notificationMessages) {
-        // Clear any existing notifications first
-        Office.context.mailbox.item.notificationMessages.getAllAsync(function(getAllResult) {
-          if (getAllResult.status === Office.AsyncResultStatus.Succeeded) {
-            // Remove existing authopsy notifications
-            getAllResult.value.forEach(function(notification) {
-              if (notification.key && notification.key.startsWith("authopsy")) {
-                Office.context.mailbox.item.notificationMessages.removeAsync(notification.key);
-              }
-            });
-          }
-          
-          // Add new notification after clearing
-          setTimeout(function() {
-            Office.context.mailbox.item.notificationMessages.addAsync(notificationKey, {
-              type: "informationalMessage",
-              message: title + ": " + content.substring(0, 150) + (content.length > 150 ? "..." : ""),
-              icon: "iconid",
-              persistent: true  // Make it persistent so user can read it
-            }, function(result) {
-              if (result.status === Office.AsyncResultStatus.Failed) {
-                console.error("Notification failed, trying task pane: " + result.error.message);
-                tryTaskPane(title, content);
-              } else {
-                console.log("Notification shown successfully with key: " + notificationKey);
-                
-                // Auto-remove after 5 seconds
-                setTimeout(function() {
-                  Office.context.mailbox.item.notificationMessages.removeAsync(notificationKey);
-                }, 5000);
-              }
-            });
-          }, 100);
+        const simpleKey = "authopsy_" + Math.random().toString(36).substr(2, 5);
+        
+        Office.context.mailbox.item.notificationMessages.addAsync(simpleKey, {
+          type: "informationalMessage",
+          message: title + ": " + content.substring(0, 100),
+          persistent: false
         });
-      } else {
-        console.log("Notifications not available, trying task pane");
-        tryTaskPane(title, content);
       }
     } catch (error) {
-      console.error("Error showing result: " + error.message);
-      tryTaskPane(title, content);
+      console.log("Notification failed, but result is in console");
     }
   }
   
-  // Fallback to try opening task pane
-  function tryTaskPane(title, content) {
-    try {
-      // For Outlook Web, try opening the dialog
-      Office.context.ui.displayDialogAsync(
-        "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
-        encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
-        { 
-          height: 60, 
-          width: 80, 
-          displayInIframe: false
-        },
-        function (result) {
-          if (result.status === Office.AsyncResultStatus.Failed) {
-            console.error("Dialog failed: " + result.error.message);
-            // Final fallback - log to console
-            console.log("RESULT: " + title + " - " + content);
-          } else {
-            console.log("Dialog opened successfully");
-            const dialog = result.value;
-            
-            // Handle dialog events
-            dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
-              if (arg.message === "dialogClosed") {
-                dialog.close();
-              }
-            });
-          }
-        }
-      );
-    } catch (error) {
-      console.error("Task pane fallback failed: " + error.message);
-      console.log("FINAL RESULT: " + title + " - " + content);
-    }
-  }
-  
-  // Handler for DMARC details
+  // Handler for DMARC details - SIMPLIFIED
   function showDmarcDetails(event) {
     console.log("DMARC details requested");
-    try {
-      parseEmailHeaders(function(results) {
-        showResult("DMARC Analysis", results.dmarc.details);
-        
-        // Always signal completion
-        if (event && event.completed) {
-          setTimeout(function() {
-            event.completed();
-          }, 100);
-        }
-      });
-    } catch (error) {
-      console.error("Error in showDmarcDetails: " + error.message);
-      showResult("DMARC Error", "Failed to analyze DMARC: " + error.message);
-      
-      if (event && event.completed) {
-        setTimeout(function() {
-          event.completed();
-        }, 100);
-      }
+    
+    parseEmailHeaders(function(results) {
+      showResult("DMARC Analysis", results.dmarc.details);
+    });
+    
+    // ALWAYS complete the event immediately
+    if (event && event.completed) {
+      event.completed();
     }
   }
   
-  // Handler for DKIM details
+  // Handler for DKIM details - SIMPLIFIED
   function showDkimDetails(event) {
     console.log("DKIM details requested");
-    try {
-      parseEmailHeaders(function(results) {
-        showResult("DKIM Analysis", results.dkim.details);
-        
-        // Always signal completion
-        if (event && event.completed) {
-          setTimeout(function() {
-            event.completed();
-          }, 100);
-        }
-      });
-    } catch (error) {
-      console.error("Error in showDkimDetails: " + error.message);
-      showResult("DKIM Error", "Failed to analyze DKIM: " + error.message);
-      
-      if (event && event.completed) {
-        setTimeout(function() {
-          event.completed();
-        }, 100);
-      }
+    
+    parseEmailHeaders(function(results) {
+      showResult("DKIM Analysis", results.dkim.details);
+    });
+    
+    // ALWAYS complete the event immediately
+    if (event && event.completed) {
+      event.completed();
     }
   }
   
-  // Handler for SPF details
+  // Handler for SPF details - SIMPLIFIED
   function showSpfDetails(event) {
     console.log("SPF details requested");
-    try {
-      parseEmailHeaders(function(results) {
-        showResult("SPF Analysis", results.spf.details);
-        
-        // Always signal completion
-        if (event && event.completed) {
-          setTimeout(function() {
-            event.completed();
-          }, 100);
-        }
-      });
-    } catch (error) {
-      console.error("Error in showSpfDetails: " + error.message);
-      showResult("SPF Error", "Failed to analyze SPF: " + error.message);
-      
-      if (event && event.completed) {
-        setTimeout(function() {
-          event.completed();
-        }, 100);
-      }
+    
+    parseEmailHeaders(function(results) {
+      showResult("SPF Analysis", results.spf.details);
+    });
+    
+    // ALWAYS complete the event immediately
+    if (event && event.completed) {
+      event.completed();
     }
   }
 
