@@ -41,7 +41,7 @@
       </TabletSettings>
       <PhoneSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>250</RequestedHeight>
+        <!-- Removed RequestedHeight since it's not allowed for PhoneSettings -->
       </PhoneSettings>
     </Form>
   </FormSettings>
