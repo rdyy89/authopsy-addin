@@ -103,9 +103,6 @@
         <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
         <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
       </bt:Images>
-      <bt:Urls>
-        <bt:Url id="apiUrl" DefaultValue="https://rdyy89.github.io/authopsy-addin/api/" />
-      </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="DisplayName" DefaultValue="Authopsy" />
         <bt:String id="Description" DefaultValue="Analyze email authentication headers for DMARC, DKIM, and SPF." />
