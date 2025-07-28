@@ -6,7 +6,7 @@
   
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
-    // If needed, add page initialization code here
+    console.log("Commands initialized with reason: " + reason);
   };
 
   // Helper function to parse email headers
@@ -115,45 +115,90 @@
     }
   }
   
-  // Show dialog with details
+  // Show dialog with details - improved error handling
   function showDialog(title, content) {
-    Office.context.ui.displayDialogAsync(
-      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
-      encodeURIComponent(title) + 
-      "&content=" + 
-      encodeURIComponent(content),
-      { height: 30, width: 20, displayInIframe: true },
-      function (result) {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          console.error("Dialog creation failed: " + result.error.message);
+    try {
+      Office.context.ui.displayDialogAsync(
+        "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
+        encodeURIComponent(title) + 
+        "&content=" + 
+        encodeURIComponent(content),
+        { height: 40, width: 30, displayInIframe: true },
+        function (result) {
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Dialog creation failed: " + result.error.message);
+            // Show notification as fallback
+            Office.context.mailbox.item.notificationMessages.addAsync("authopsyError", {
+              type: "informationalMessage",
+              message: title + ": " + content,
+              icon: "iconid",
+              persistent: false
+            });
+          }
         }
+      );
+    } catch (error) {
+      console.error("Dialog error: " + error.message);
+      // Show notification as fallback
+      try {
+        Office.context.mailbox.item.notificationMessages.addAsync("authopsyError", {
+          type: "informationalMessage",
+          message: title + ": " + content,
+          icon: "iconid",
+          persistent: false
+        });
+      } catch (notifError) {
+        console.error("Notification also failed: " + notifError.message);
       }
-    );
+    }
   }
   
-  // Handler for DMARC details
-  function showDmarcDetails() {
+  // Handler for DMARC details - improved
+  function showDmarcDetails(event) {
+    console.log("DMARC details requested");
     parseEmailHeaders(function(results) {
       showDialog("DMARC Details", results.dmarc.details);
+      if (event && event.completed) {
+        event.completed();
+      }
     });
   }
   
-  // Handler for DKIM details
-  function showDkimDetails() {
+  // Handler for DKIM details - improved
+  function showDkimDetails(event) {
+    console.log("DKIM details requested");
     parseEmailHeaders(function(results) {
       showDialog("DKIM Details", results.dkim.details);
+      if (event && event.completed) {
+        event.completed();
+      }
     });
   }
   
-  // Handler for SPF details
-  function showSpfDetails() {
+  // Handler for SPF details - improved
+  function showSpfDetails(event) {
+    console.log("SPF details requested");
     parseEmailHeaders(function(results) {
       showDialog("SPF Details", results.spf.details);
+      if (event && event.completed) {
+        event.completed();
+      }
     });
   }
 
-  // Register functions
-  Office.actions.associate("showDmarcDetails", showDmarcDetails);
-  Office.actions.associate("showDkimDetails", showDkimDetails);
-  Office.actions.associate("showSpfDetails", showSpfDetails);
+  // Register functions with error handling
+  try {
+    if (Office.actions) {
+      Office.actions.associate("showDmarcDetails", showDmarcDetails);
+      Office.actions.associate("showDkimDetails", showDkimDetails);
+      Office.actions.associate("showSpfDetails", showSpfDetails);
+    }
+  } catch (error) {
+    console.error("Failed to register actions: " + error.message);
+  }
+
+  // Also expose globally as fallback
+  window.showDmarcDetails = showDmarcDetails;
+  window.showDkimDetails = showDkimDetails;
+  window.showSpfDetails = showSpfDetails;
 })();

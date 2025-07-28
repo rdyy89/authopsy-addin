@@ -6,11 +6,12 @@
 
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
-    document.addEventListener("DOMContentLoaded", function() {
+    $(document).ready(function () {
       // Set up event handlers
-      document.getElementById("dmarcDetails").addEventListener("click", showDmarcDetails);
-      document.getElementById("dkimDetails").addEventListener("click", showDkimDetails);
-      document.getElementById("spfDetails").addEventListener("click", showSpfDetails);
+      $("#dmarcDetails").on("click", showDmarcDetails);
+      $("#dkimDetails").on("click", showDkimDetails);
+      $("#spfDetails").on("click", showSpfDetails);
+      $("#pinButton").on("click", handlePinning);
       
       // Start the analysis
       analyzeEmailHeaders();
@@ -52,16 +53,13 @@
   // Update UI based on loading status
   function updateUIStatus(status) {
     if (status === "loading") {
-      document.getElementById("dmarcStatus").textContent = "Loading...";
-      document.getElementById("dmarcStatus").className = "result-status loading";
-      document.getElementById("dkimStatus").textContent = "Loading...";
-      document.getElementById("dkimStatus").className = "result-status loading";
-      document.getElementById("spfStatus").textContent = "Loading...";
-      document.getElementById("spfStatus").className = "result-status loading";
+      $("#dmarcStatus").text("Loading...").removeClass().addClass("result-status loading");
+      $("#dkimStatus").text("Loading...").removeClass().addClass("result-status loading");
+      $("#spfStatus").text("Loading...").removeClass().addClass("result-status loading");
       
-      document.getElementById("dmarcIcon").textContent = "❓";
-      document.getElementById("dkimIcon").textContent = "❓";
-      document.getElementById("spfIcon").textContent = "❓";
+      $("#dmarcIcon").text("❓");
+      $("#dkimIcon").text("❓");
+      $("#spfIcon").text("❓");
     }
   }
   
@@ -79,14 +77,14 @@
   
   // Helper function to update status element
   function updateStatusElement(type, status, text) {
-    const statusElement = document.getElementById(type + "Status");
-    const iconElement = document.getElementById(type + "Icon");
+    const $statusElement = $("#" + type + "Status");
+    const $iconElement = $("#" + type + "Icon");
     
     // Remove all classes and add the status class
-    statusElement.className = "result-status " + status;
+    $statusElement.removeClass().addClass("result-status " + status);
     
     // Set the text
-    statusElement.textContent = text;
+    $statusElement.text(text);
     
     // Update icon with emoji
     const iconMap = {
@@ -94,7 +92,7 @@
       "fail": "❌", 
       "unknown": "❓"
     };
-    iconElement.textContent = iconMap[status] || "❓";
+    $iconElement.text(iconMap[status] || "❓");
   }
   
   // Get status text from status code
@@ -181,30 +179,35 @@
   
   // Handle errors
   function handleError(message) {
-    document.getElementById("dmarcStatus").textContent = "Error";
-    document.getElementById("dmarcStatus").className = "result-status unknown";
-    document.getElementById("dkimStatus").textContent = "Error";
-    document.getElementById("dkimStatus").className = "result-status unknown";
-    document.getElementById("spfStatus").textContent = "Error";
-    document.getElementById("spfStatus").className = "result-status unknown";
+    $("#dmarcStatus").text("Error").removeClass().addClass("result-status unknown");
+    $("#dkimStatus").text("Error").removeClass().addClass("result-status unknown");
+    $("#spfStatus").text("Error").removeClass().addClass("result-status unknown");
     
     console.error("Error: " + message);
   }
   
   // Show dialog with details
   function showDialog(title, content) {
-    Office.context.ui.displayDialogAsync(
-      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
-      encodeURIComponent(title) + 
-      "&content=" + 
-      encodeURIComponent(content),
-      { height: 30, width: 20, displayInIframe: true },
-      function (result) {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          console.error("Dialog creation failed: " + result.error.message);
+    try {
+      Office.context.ui.displayDialogAsync(
+        "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
+        encodeURIComponent(title) + 
+        "&content=" + 
+        encodeURIComponent(content),
+        { height: 40, width: 30, displayInIframe: true },
+        function (result) {
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Dialog creation failed: " + result.error.message);
+            // Fallback to alert if dialog fails
+            alert(title + "\n\n" + content);
+          }
         }
-      }
-    );
+      );
+    } catch (error) {
+      console.error("Dialog error: " + error.message);
+      // Fallback to alert if dialog completely fails
+      alert(title + "\n\n" + content);
+    }
   }
   
   // Show DMARC details
@@ -236,16 +239,24 @@
   
   // Handle pinning behavior
   function handlePinning() {
-    Office.context.ui.displayDialogAsync(
-      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=Pin%20Authopsy&content=Would%20you%20like%20to%20pin%20Authopsy%20for%20quick%20access?",
-      { height: 30, width: 20, displayInIframe: true },
-      function (result) {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          console.error("Dialog creation failed: " + result.error.message);
+    try {
+      // Try to pin the add-in
+      Office.context.ui.displayDialogAsync(
+        "https://rdyy89.github.io/authopsy-addin/dialog.html?title=Pin%20Authopsy&content=This%20add-in%20is%20now%20pinned%20for%20quick%20access.",
+        { height: 30, width: 25, displayInIframe: true },
+        function (result) {
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Pin dialog failed: " + result.error.message);
+          }
         }
-      }
-    );
+      );
+    } catch (error) {
+      console.error("Pin error: " + error.message);
+    }
   }
-  
-  document.getElementById("pinButton").addEventListener("click", handlePinning);
+
+  // Global functions for command access
+  window.showDmarcDetails = showDmarcDetails;
+  window.showDkimDetails = showDkimDetails;
+  window.showSpfDetails = showSpfDetails;
 })();
