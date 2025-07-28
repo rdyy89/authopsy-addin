@@ -190,7 +190,7 @@
   function showDialog(title, content) {
     try {
       Office.context.ui.displayDialogAsync(
-        "https://rdyy89.github.io/authopsy-addin/dialog.html?title=" + 
+        "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
         encodeURIComponent(title) + 
         "&content=" + 
         encodeURIComponent(content),
@@ -198,15 +198,11 @@
         function (result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
             console.error("Dialog creation failed: " + result.error.message);
-            // Fallback to alert if dialog fails
-            alert(title + "\n\n" + content);
           }
         }
       );
     } catch (error) {
       console.error("Dialog error: " + error.message);
-      // Fallback to alert if dialog completely fails
-      alert(title + "\n\n" + content);
     }
   }
   

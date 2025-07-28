@@ -9,6 +9,7 @@
 
   // Track active dialog
   let activeDialog = null;
+  let pendingDialog = false;
 
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
@@ -133,16 +134,35 @@
   function showResult(title, content) {
     console.log(title + ": " + content);
     
+    // If we're already pending a dialog, don't try to open another
+    if (pendingDialog) {
+      console.log("Dialog already pending, ignoring request");
+      return;
+    }
+    
     // Close any existing dialog first
     if (activeDialog) {
       try {
+        pendingDialog = true;
         activeDialog.close();
         activeDialog = null;
+        
+        // Wait a moment for the dialog to close completely
+        setTimeout(function() {
+          openResultsDialog(title, content);
+        }, 500);
       } catch (error) {
         console.log("Error closing existing dialog: " + error.message);
+        pendingDialog = false;
+        openResultsDialog(title, content);
       }
+    } else {
+      openResultsDialog(title, content);
     }
-    
+  }
+  
+  // Helper function to open the results dialog
+  function openResultsDialog(title, content) {
     try {
       // Try to open results page in dialog
       Office.context.ui.displayDialogAsync(
@@ -150,6 +170,8 @@
         encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
         { height: 50, width: 60, displayInIframe: true },
         function (result) {
+          pendingDialog = false;
+          
           if (result.status === Office.AsyncResultStatus.Failed) {
             console.error("Results dialog failed: " + result.error.message);
             activeDialog = null;
@@ -171,6 +193,7 @@
     } catch (error) {
       console.error("Results error: " + error.message);
       activeDialog = null;
+      pendingDialog = false;
     }
   }
   
