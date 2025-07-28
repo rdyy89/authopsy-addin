@@ -29,3 +29,10 @@ button {
     cursor: pointer;
     border-radius: 2px;
 }
+/* Replace deprecated -ms-high-contrast */
+@media (forced-colors: active) {
+    body {
+        background-color: Window;
+        color: WindowText;
+    }
+}

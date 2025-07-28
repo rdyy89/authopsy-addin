@@ -52,10 +52,17 @@ h1 {
 .result-status.unknown {
     color: #e67e00;
 }
-.details-btn {
+button.details-btn {
     background: none;
     border: none;
     color: #0078d4;
     cursor: pointer;
     text-decoration: underline;
+}
+/* Replace deprecated -ms-high-contrast */
+@media (forced-colors: active) {
+    body {
+        background-color: Window;
+        color: WindowText;
+    }
 }
