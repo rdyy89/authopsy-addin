@@ -140,29 +140,37 @@
       return;
     }
     
-    // Close any existing dialog first
+    // Force close any existing dialog first
+    cleanupDialog();
+    
+    // Wait a moment before opening new dialog
+    setTimeout(function() {
+      openResultsDialog(title, content);
+    }, 100);
+  }
+  
+  // Helper function to clean up dialog state
+  function cleanupDialog() {
     if (activeDialog) {
       try {
-        pendingDialog = true;
         activeDialog.close();
-        activeDialog = null;
-        
-        // Wait a moment for the dialog to close completely
-        setTimeout(function() {
-          openResultsDialog(title, content);
-        }, 500);
       } catch (error) {
-        console.log("Error closing existing dialog: " + error.message);
-        pendingDialog = false;
-        openResultsDialog(title, content);
+        console.log("Error closing dialog: " + error.message);
       }
-    } else {
-      openResultsDialog(title, content);
     }
+    activeDialog = null;
+    pendingDialog = false;
   }
   
   // Helper function to open the results dialog
   function openResultsDialog(title, content) {
+    if (pendingDialog) {
+      console.log("Another dialog is pending, skipping");
+      return;
+    }
+    
+    pendingDialog = true;
+    
     try {
       // Try to open results page in dialog
       Office.context.ui.displayDialogAsync(
@@ -179,21 +187,25 @@
             console.log("Results dialog opened successfully");
             activeDialog = result.value;
             
-            // Set up dialog event handlers
-            activeDialog.addEventHandler(Office.EventType.DialogEventReceived, function() {
-              activeDialog = null;
-            });
-            
-            activeDialog.addEventHandler(Office.EventType.DialogMessageReceived, function() {
-              activeDialog = null;
-            });
+            // Set up dialog event handlers with better cleanup
+            if (activeDialog) {
+              activeDialog.addEventHandler(Office.EventType.DialogEventReceived, function(eventArgs) {
+                console.log("Dialog event received:", eventArgs);
+                cleanupDialog();
+              });
+              
+              activeDialog.addEventHandler(Office.EventType.DialogMessageReceived, function(eventArgs) {
+                console.log("Dialog message received:", eventArgs);
+                cleanupDialog();
+              });
+            }
           }
         }
       );
     } catch (error) {
       console.error("Results error: " + error.message);
-      activeDialog = null;
       pendingDialog = false;
+      activeDialog = null;
     }
   }
   

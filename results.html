@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <title>Authopsy Results</title>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -70,10 +71,15 @@
             <div id="resultStatus" class="status">Loading...</div>
             <div id="resultContent" class="details">Please wait...</div>
         </div>
-        <button class="close-btn" onclick="window.close()">Close</button>
+        <button class="close-btn" onclick="closeDialog()">Close</button>
     </div>
 
     <script>
+        // Initialize Office
+        Office.initialize = function(reason) {
+            console.log("Results dialog initialized");
+        };
+        
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Analysis Results';
@@ -101,6 +107,36 @@
         } else {
             statusElement.textContent = '❓ UNKNOWN';
         }
+        
+        // Function to properly close the dialog
+        function closeDialog() {
+            try {
+                // Send message to parent before closing
+                if (Office.context && Office.context.ui) {
+                    Office.context.ui.messageParent("dialogClosed");
+                }
+            } catch (error) {
+                console.log("Error sending close message: " + error.message);
+            }
+            
+            // Try to close the window
+            try {
+                window.close();
+            } catch (error) {
+                console.log("Error closing window: " + error.message);
+            }
+        }
+        
+        // Handle browser close events
+        window.addEventListener('beforeunload', function() {
+            try {
+                if (Office.context && Office.context.ui) {
+                    Office.context.ui.messageParent("dialogClosed");
+                }
+            } catch (error) {
+                console.log("Error in beforeunload: " + error.message);
+            }
+        });
     </script>
 </body>
 </html>

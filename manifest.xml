@@ -35,9 +35,9 @@
   </Rule>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
-      <Sets>
-        <Set Name="Mailbox" MinVersion="1.5" />
-      </Sets>
+      <bt:Sets>
+        <bt:Set Name="Mailbox" MinVersion="1.5" />
+      </bt:Sets>
     </Requirements>
     <Hosts>
       <Host xsi:type="MailHost">
