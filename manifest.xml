@@ -34,6 +34,11 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
   </Rule>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Requirements>
+      <Sets>
+        <Set Name="Mailbox" MinVersion="1.5" />
+      </Sets>
+    </Requirements>
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>

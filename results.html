@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Authopsy Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h2 {
+            color: #0078d4;
+            margin-bottom: 15px;
+        }
+        .result {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .close-btn {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h2 id="resultTitle">Analysis Results</h2>
+    <div id="resultContent" class="result">Loading...</div>
+    <button class="close-btn" onclick="window.close()">Close</button>
+
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get('title') || 'Analysis Results';
+        const content = urlParams.get('content') || 'No results available';
+        
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultContent').textContent = content;
+    </script>
+</body>
+</html>

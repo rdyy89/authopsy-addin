@@ -126,25 +126,32 @@
     }
   }
   
-  // Show notification - simplified and more reliable
-  function showNotification(title, content) {
+  // Show results using multiple fallback approaches
+  function showResult(title, content) {
+    console.log(title + ": " + content);
+    
     try {
-      // Clear any existing notifications first
-      Office.context.mailbox.item.notificationMessages.removeAsync("authopsyResult", function() {
-        // Add new notification
-        Office.context.mailbox.item.notificationMessages.addAsync("authopsyResult", {
-          type: "informationalMessage",
-          message: title + ": " + content,
-          icon: "iconid",
-          persistent: false
-        }, function(result) {
+      // Try to open results page in dialog
+      Office.context.ui.displayDialogAsync(
+        "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
+        encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
+        { height: 40, width: 50, displayInIframe: true },
+        function (result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
-            console.error("Notification failed: " + result.error.message);
+            console.error("Results dialog failed: " + result.error.message);
+            // Fallback to alert
+            if (typeof alert !== 'undefined') {
+              alert(title + "\n\n" + content);
+            }
           }
-        });
-      });
+        }
+      );
     } catch (error) {
-      console.error("Notification error: " + error.message);
+      console.error("Results error: " + error.message);
+      // Fallback to alert
+      if (typeof alert !== 'undefined') {
+        alert(title + "\n\n" + content);
+      }
     }
   }
   
@@ -153,14 +160,14 @@
     console.log("DMARC details requested");
     try {
       parseEmailHeaders(function(results) {
-        showNotification("DMARC Analysis", results.dmarc.details);
+        showResult("DMARC Analysis", results.dmarc.details);
         if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showDmarcDetails: " + error.message);
-      showNotification("DMARC Error", "Failed to analyze DMARC: " + error.message);
+      showResult("DMARC Error", "Failed to analyze DMARC: " + error.message);
       if (event && typeof event.completed === 'function') {
         event.completed();
       }
@@ -172,14 +179,14 @@
     console.log("DKIM details requested");
     try {
       parseEmailHeaders(function(results) {
-        showNotification("DKIM Analysis", results.dkim.details);
+        showResult("DKIM Analysis", results.dkim.details);
         if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showDkimDetails: " + error.message);
-      showNotification("DKIM Error", "Failed to analyze DKIM: " + error.message);
+      showResult("DKIM Error", "Failed to analyze DKIM: " + error.message);
       if (event && typeof event.completed === 'function') {
         event.completed();
       }
@@ -191,14 +198,14 @@
     console.log("SPF details requested");
     try {
       parseEmailHeaders(function(results) {
-        showNotification("SPF Analysis", results.spf.details);
+        showResult("SPF Analysis", results.spf.details);
         if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showSpfDetails: " + error.message);
-      showNotification("SPF Error", "Failed to analyze SPF: " + error.message);
+      showResult("SPF Error", "Failed to analyze SPF: " + error.message);
       if (event && typeof event.completed === 'function') {
         event.completed();
       }
