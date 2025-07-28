@@ -7,6 +7,9 @@
   }
   window.authopsyCommandsInitialized = true;
 
+  // Track active dialog
+  let activeDialog = null;
+
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
     console.log("Commands initialized with reason: " + reason);
@@ -126,9 +129,19 @@
     }
   }
   
-  // Show results using multiple fallback approaches
+  // Show results using dialog only
   function showResult(title, content) {
     console.log(title + ": " + content);
+    
+    // Close any existing dialog first
+    if (activeDialog) {
+      try {
+        activeDialog.close();
+        activeDialog = null;
+      } catch (error) {
+        console.log("Error closing existing dialog: " + error.message);
+      }
+    }
     
     try {
       // Try to open results page in dialog
@@ -139,21 +152,25 @@
         function (result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
             console.error("Results dialog failed: " + result.error.message);
-            // Fallback to alert
-            if (typeof alert !== 'undefined') {
-              alert(title + "\n\n" + content);
-            }
+            activeDialog = null;
           } else {
             console.log("Results dialog opened successfully");
+            activeDialog = result.value;
+            
+            // Set up dialog event handlers
+            activeDialog.addEventHandler(Office.EventType.DialogEventReceived, function() {
+              activeDialog = null;
+            });
+            
+            activeDialog.addEventHandler(Office.EventType.DialogMessageReceived, function() {
+              activeDialog = null;
+            });
           }
         }
       );
     } catch (error) {
       console.error("Results error: " + error.message);
-      // Fallback to alert
-      if (typeof alert !== 'undefined') {
-        alert(title + "\n\n" + content);
-      }
+      activeDialog = null;
     }
   }
   
