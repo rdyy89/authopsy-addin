@@ -7,9 +7,16 @@
   }
   window.authopsyCommandsInitialized = true;
 
+  // Enhanced debugging
+  console.log("🚀 AUTHOPSY COMMANDS LOADING 🚀");
+  console.log("Timestamp:", new Date().toISOString());
+  console.log("User Agent:", navigator.userAgent);
+
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
-    console.log("Commands initialized with reason: " + reason);
+    console.log("🎯 Commands initialized with reason:", reason);
+    console.log("Office context:", Office.context);
+    console.log("Office version:", Office.context ? Office.context.requirements : "N/A");
   };
 
   // Helper function to parse email headers
@@ -126,97 +133,127 @@
     }
   }
   
-  // Show results - DEBUG VERSION
+  // Show results - ENHANCED DEBUG VERSION
   function showResult(title, content) {
-    console.log("=== " + title + " ===");
-    console.log(content);
-    console.log("===============");
+    console.log("🔍 === SHOWING RESULT ===");
+    console.log("📋 Title:", title);
+    console.log("📄 Content:", content);
+    console.log("🕐 Timestamp:", new Date().toLocaleTimeString());
     
-    // DEBUG: Check what APIs are available
-    console.log("Office.context available:", !!Office.context);
-    console.log("Office.context.mailbox available:", !!Office.context.mailbox);
-    console.log("Office.context.mailbox.item available:", !!Office.context.mailbox.item);
-    console.log("notificationMessages available:", !!Office.context.mailbox.item.notificationMessages);
+    // Comprehensive API availability check
+    const apiCheck = {
+      "Office.context": !!Office.context,
+      "Office.context.mailbox": !!(Office.context && Office.context.mailbox),
+      "Office.context.mailbox.item": !!(Office.context && Office.context.mailbox && Office.context.mailbox.item),
+      "notificationMessages": !!(Office.context && Office.context.mailbox && Office.context.mailbox.item && Office.context.mailbox.item.notificationMessages),
+      "displayDialogAsync": !!(Office.context && Office.context.ui && Office.context.ui.displayDialogAsync)
+    };
     
-    // Try multiple notification approaches
-    try {
-      if (Office.context.mailbox.item.notificationMessages) {
-        const simpleKey = "authopsy_debug_" + Date.now();
-        console.log("Attempting notification with key:", simpleKey);
+    console.table(apiCheck);
+    
+    // Try notification with extensive error handling
+    if (Office.context && Office.context.mailbox && Office.context.mailbox.item && Office.context.mailbox.item.notificationMessages) {
+      const debugKey = "authopsy_debug_" + Date.now();
+      console.log("🔔 Attempting notification with key:", debugKey);
+      
+      const notificationData = {
+        type: "informationalMessage",
+        message: title + ": " + content.substring(0, 100) + (content.length > 100 ? "..." : ""),
+        persistent: true
+      };
+      
+      console.log("📤 Notification data:", notificationData);
+      
+      Office.context.mailbox.item.notificationMessages.addAsync(debugKey, notificationData, function(result) {
+        console.log("🎯 Notification callback triggered");
+        console.log("📊 Result object:", result);
+        console.log("✅ Status:", result.status);
+        console.log("🔄 AsyncContext:", result.asyncContext);
         
-        Office.context.mailbox.item.notificationMessages.addAsync(simpleKey, {
-          type: "informationalMessage",
-          message: title + ": " + content.substring(0, 80) + "...",
-          persistent: true  // Make it stick around
-        }, function(result) {
-          console.log("Notification result:", result);
-          if (result.status === Office.AsyncResultStatus.Failed) {
-            console.error("Notification failed:", result.error);
-            console.error("Error name:", result.error.name);
-            console.error("Error message:", result.error.message);
-            console.error("Error code:", result.error.code);
-          } else {
-            console.log("✅ Notification added successfully!");
-            
-            // Auto-remove after 8 seconds for testing
-            setTimeout(function() {
-              Office.context.mailbox.item.notificationMessages.removeAsync(simpleKey, function(removeResult) {
-                console.log("Notification removal result:", removeResult);
-              });
-            }, 8000);
+        if (result.status === Office.AsyncResultStatus.Failed) {
+          console.error("❌ NOTIFICATION FAILED");
+          console.error("🚨 Error object:", result.error);
+          console.error("📛 Error name:", result.error.name);
+          console.error("💬 Error message:", result.error.message);
+          console.error("🔢 Error code:", result.error.code);
+          
+          // Try to get more error details
+          try {
+            console.error("🔍 Full error:", JSON.stringify(result.error, null, 2));
+          } catch (e) {
+            console.error("🔍 Error serialization failed:", e.message);
           }
-        });
-      } else {
-        console.error("❌ notificationMessages API not available");
-        console.log("Available APIs:", Object.keys(Office.context.mailbox.item));
-      }
-    } catch (error) {
-      console.error("❌ Exception in showResult:", error);
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+        } else {
+          console.log("🎉 NOTIFICATION SUCCESS!");
+          console.log("⏰ Auto-removing in 10 seconds...");
+          
+          // Auto-remove with debug info
+          setTimeout(function() {
+            console.log("🗑️ Removing notification:", debugKey);
+            Office.context.mailbox.item.notificationMessages.removeAsync(debugKey, function(removeResult) {
+              console.log("🗑️ Removal result:", removeResult);
+            });
+          }, 10000);
+        }
+      });
+    } else {
+      console.error("❌ NOTIFICATION API NOT AVAILABLE");
+      console.log("🔍 Available item APIs:", Object.keys(Office.context?.mailbox?.item || {}));
     }
   }
   
-  // Handler for DMARC details - SIMPLIFIED
+  // Enhanced handler functions with more debugging
   function showDmarcDetails(event) {
-    console.log("DMARC details requested");
+    console.log("🛡️ === DMARC ANALYSIS STARTED ===");
+    console.log("📧 Event object:", event);
+    console.log("⚡ Event type:", typeof event);
+    console.log("🔧 Event properties:", Object.keys(event || {}));
     
     parseEmailHeaders(function(results) {
+      console.log("📊 DMARC Results:", results.dmarc);
       showResult("DMARC Analysis", results.dmarc.details);
     });
     
-    // ALWAYS complete the event immediately
+    // Signal completion with debug
     if (event && event.completed) {
+      console.log("✅ Completing DMARC event");
       event.completed();
+    } else {
+      console.warn("⚠️ No completion callback available");
     }
   }
   
-  // Handler for DKIM details - SIMPLIFIED
   function showDkimDetails(event) {
-    console.log("DKIM details requested");
+    console.log("🔐 === DKIM ANALYSIS STARTED ===");
+    console.log("📧 Event object:", event);
     
     parseEmailHeaders(function(results) {
+      console.log("📊 DKIM Results:", results.dkim);
       showResult("DKIM Analysis", results.dkim.details);
     });
     
-    // ALWAYS complete the event immediately
     if (event && event.completed) {
+      console.log("✅ Completing DKIM event");
       event.completed();
+    } else {
+      console.warn("⚠️ No completion callback available");
     }
   }
   
-  // Handler for SPF details - SIMPLIFIED
   function showSpfDetails(event) {
-    console.log("SPF details requested");
+    console.log("📮 === SPF ANALYSIS STARTED ===");
+    console.log("📧 Event object:", event);
     
     parseEmailHeaders(function(results) {
+      console.log("📊 SPF Results:", results.spf);
       showResult("SPF Analysis", results.spf.details);
     });
     
-    // ALWAYS complete the event immediately
     if (event && event.completed) {
+      console.log("✅ Completing SPF event");
       event.completed();
+    } else {
+      console.warn("⚠️ No completion callback available");
     }
   }
 
@@ -254,4 +291,6 @@
     window.showDkimDetails = showDkimDetails;
     window.showSpfDetails = showSpfDetails;
   }
+
+  console.log("🏁 AUTHOPSY COMMANDS LOADED SUCCESSFULLY 🏁");
 })();
