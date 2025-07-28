@@ -21,19 +21,35 @@
 
   // Helper function to parse email headers
   function parseEmailHeaders(callback) {
+    console.log("📧 === PARSING EMAIL HEADERS ===");
+    console.log("🔍 Office.context.mailbox.item:", Office.context.mailbox.item);
+    console.log("🔍 getAllInternetHeadersAsync available:", !!Office.context.mailbox.item.getAllInternetHeadersAsync);
+    
     try {
+      console.log("🚀 Calling getAllInternetHeadersAsync...");
+      
       Office.context.mailbox.item.getAllInternetHeadersAsync(function (result) {
+        console.log("📬 getAllInternetHeadersAsync callback triggered");
+        console.log("📊 Result status:", result.status);
+        console.log("📊 Result object:", result);
+        
         if (result.status === Office.AsyncResultStatus.Succeeded) {
+          console.log("✅ Headers retrieved successfully");
           const headers = result.value;
+          console.log("📄 Headers length:", headers ? headers.length : "null");
+          console.log("📄 Headers preview:", headers ? headers.substring(0, 200) + "..." : "null");
           
           // Parse DMARC results
           const dmarcResult = parseDmarcResult(headers);
+          console.log("🛡️ DMARC parsed:", dmarcResult);
           
           // Parse DKIM results
           const dkimResult = parseDkimResult(headers);
+          console.log("🔐 DKIM parsed:", dkimResult);
           
           // Parse SPF results
           const spfResult = parseSpfResult(headers);
+          console.log("📮 SPF parsed:", spfResult);
           
           const results = {
             dmarc: dmarcResult,
@@ -41,9 +57,15 @@
             spf: spfResult
           };
           
+          console.log("📋 Final results:", results);
           callback(results);
         } else {
-          console.error("Failed to get headers: " + result.error.message);
+          console.error("❌ Failed to get headers");
+          console.error("🚨 Error:", result.error);
+          console.error("📛 Error name:", result.error.name);
+          console.error("💬 Error message:", result.error.message);
+          console.error("🔢 Error code:", result.error.code);
+          
           callback({
             dmarc: { status: "unknown", details: "Error retrieving headers: " + result.error.message },
             dkim: { status: "unknown", details: "Error retrieving headers: " + result.error.message },
@@ -52,7 +74,11 @@
         }
       });
     } catch (error) {
-      console.error("Error in parseEmailHeaders: " + error.message);
+      console.error("💥 Exception in parseEmailHeaders:", error);
+      console.error("📛 Error name:", error.name);
+      console.error("💬 Error message:", error.message);
+      console.error("📚 Error stack:", error.stack);
+      
       callback({
         dmarc: { status: "unknown", details: "Error parsing headers: " + error.message },
         dkim: { status: "unknown", details: "Error parsing headers: " + error.message },
