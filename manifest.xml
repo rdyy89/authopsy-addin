@@ -5,30 +5,25 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
-  <!-- Begin Basic Settings: Add-in metadata -->
   <Id>a13c4ac8-f7c4-4c65-8f4a-2a1b8c7e9f0d</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>Authopsy</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Authopsy"/>
-  <Description DefaultValue="Email authentication analyzer for DMARC, DKIM, and SPF"/>
+  <Description DefaultValue="Email authentication analyzer"/>
   <IconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
   <HighResolutionIconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-  <SupportUrl DefaultValue="https://github.com/rdyy89/authopsy-addin"/>
 
-  <!-- Hosts -->
   <Hosts>
     <Host Name="Mailbox" />
   </Hosts>
 
-  <!-- Requirements -->
   <Requirements>
     <Sets>
       <Set Name="Mailbox" MinVersion="1.1" />
     </Sets>
   </Requirements>
 
-  <!-- Form Settings -->
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
@@ -41,20 +36,15 @@
       </TabletSettings>
       <PhoneSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <!-- Removed RequestedHeight since it's not allowed for PhoneSettings -->
       </PhoneSettings>
     </Form>
   </FormSettings>
 
-  <!-- Permissions -->
   <Permissions>ReadItem</Permissions>
-
-  <!-- Rule -->
   <Rule xsi:type="RuleCollection" Mode="Or">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
   </Rule>
 
-  <!-- VERSION OVERRIDES - ADD DROPDOWN MENU -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
       <bt:Sets>
@@ -65,7 +55,6 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
-          <!-- Message Read -->
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
@@ -150,22 +139,21 @@
         <bt:String id="GroupLabel" DefaultValue="Authopsy"/>
         <bt:String id="MenuButtonLabel" DefaultValue="Authopsy"/>
         <bt:String id="MenuSuperTipTitle" DefaultValue="Authopsy"/>
-        <bt:String id="DmarcLabel" DefaultValue="DMARC: Loading..."/>
+        <bt:String id="DmarcLabel" DefaultValue="DMARC"/>
         <bt:String id="DmarcSuperTipTitle" DefaultValue="DMARC Authentication"/>
-        <bt:String id="DkimLabel" DefaultValue="DKIM: Loading..."/>
+        <bt:String id="DkimLabel" DefaultValue="DKIM"/>
         <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Authentication"/>
-        <bt:String id="SpfLabel" DefaultValue="SPF: Loading..."/>
+        <bt:String id="SpfLabel" DefaultValue="SPF"/>
         <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Authentication"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="MenuSuperTipDescription" DefaultValue="Check email authentication status including DMARC, DKIM, and SPF."/>
-        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details for this email."/>
-        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM authentication details for this email."/>
-        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details for this email."/>
+        <bt:String id="MenuSuperTipDescription" DefaultValue="Check email authentication status."/>
+        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details."/>
+        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM authentication details."/>
+        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details."/>
       </bt:LongStrings>
     </Resources>
 
-    <!-- Function command add-in integration -->
     <FunctionFile resid="Commands.Url"/>
   </VersionOverrides>
 </OfficeApp>
