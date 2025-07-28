@@ -8,7 +8,7 @@ body {
     margin-bottom: 20px;
 }
 .logo {
-    max-width: 50px;
+    font-size: 32px;
     margin-bottom: 10px;
 }
 h1 {
@@ -28,8 +28,10 @@ h1 {
     background-color: #f5f5f5;
 }
 .result-icon {
-    width: 24px;
+    font-size: 20px;
     margin-right: 10px;
+    min-width: 24px;
+    text-align: center;
 }
 .result-label {
     font-weight: bold;

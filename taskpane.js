@@ -59,9 +59,9 @@
       document.getElementById("spfStatus").textContent = "Loading...";
       document.getElementById("spfStatus").className = "result-status loading";
       
-      document.getElementById("dmarcIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
-      document.getElementById("dkimIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
-      document.getElementById("spfIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
+      document.getElementById("dmarcIcon").textContent = "❓";
+      document.getElementById("dkimIcon").textContent = "❓";
+      document.getElementById("spfIcon").textContent = "❓";
     }
   }
   
@@ -88,8 +88,13 @@
     // Set the text
     statusElement.textContent = text;
     
-    // Update icon
-    iconElement.src = "https://rdyy89.github.io/authopsy-addin/icons/" + status + ".png";
+    // Update icon with emoji
+    const iconMap = {
+      "pass": "✅",
+      "fail": "❌", 
+      "unknown": "❓"
+    };
+    iconElement.textContent = iconMap[status] || "❓";
   }
   
   // Get status text from status code
