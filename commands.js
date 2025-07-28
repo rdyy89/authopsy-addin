@@ -1,4 +1,3 @@
-// filepath: d:\github\authopsy-addin\commands.js
 (function () {
   "use strict";
 

@@ -1,0 +1,71 @@
+\authopsy-addin\dialog.html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Authopsy Details</title>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <script>
+        Office.initialize = function() {
+            // Parse URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const title = urlParams.get('title') || 'Details';
+            const content = urlParams.get('content') || 'No details available';
+            
+            // Set content
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogContent').innerText = content;
+            
+            // Set close button action
+            document.getElementById('closeButton').onclick = function() {
+                Office.context.ui.messageParent("close");
+            };
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 15px;
+        }
+        .header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        h2 {
+            margin: 0;
+            padding: 0;
+            font-size: 18px;
+        }
+        .content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .button-container {
+            margin-top: 20px;
+            text-align: right;
+        }
+        button {
+            padding: 6px 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 id="dialogTitle">Details</h2>
+    </div>
+    <div class="content">
+        <p id="dialogContent">Loading...</p>
+    </div>
+    <div class="button-container">
+        <button id="closeButton">Close</button>
+    </div>
+</body>
+</html>

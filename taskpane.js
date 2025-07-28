@@ -6,11 +6,11 @@
 
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function() {
       // Set up event handlers
-      $("#dmarcDetails").click(showDmarcDetails);
-      $("#dkimDetails").click(showDkimDetails);
-      $("#spfDetails").click(showSpfDetails);
+      document.getElementById("dmarcDetails").addEventListener("click", showDmarcDetails);
+      document.getElementById("dkimDetails").addEventListener("click", showDkimDetails);
+      document.getElementById("spfDetails").addEventListener("click", showSpfDetails);
       
       // Start the analysis
       analyzeEmailHeaders();
@@ -52,13 +52,16 @@
   // Update UI based on loading status
   function updateUIStatus(status) {
     if (status === "loading") {
-      $("#dmarcStatus").text("Loading...").addClass("loading");
-      $("#dkimStatus").text("Loading...").addClass("loading");
-      $("#spfStatus").text("Loading...").addClass("loading");
+      document.getElementById("dmarcStatus").textContent = "Loading...";
+      document.getElementById("dmarcStatus").className = "result-status loading";
+      document.getElementById("dkimStatus").textContent = "Loading...";
+      document.getElementById("dkimStatus").className = "result-status loading";
+      document.getElementById("spfStatus").textContent = "Loading...";
+      document.getElementById("spfStatus").className = "result-status loading";
       
-      $("#dmarcIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
-      $("#dkimIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
-      $("#spfIcon").attr("src", "https://rdyy89.github.io/authopsy-addin/icons/unknown.png");
+      document.getElementById("dmarcIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
+      document.getElementById("dkimIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
+      document.getElementById("spfIcon").src = "https://rdyy89.github.io/authopsy-addin/icons/unknown.png";
     }
   }
   
@@ -76,17 +79,17 @@
   
   // Helper function to update status element
   function updateStatusElement(type, status, text) {
-    const statusElement = $("#" + type + "Status");
-    const iconElement = $("#" + type + "Icon");
+    const statusElement = document.getElementById(type + "Status");
+    const iconElement = document.getElementById(type + "Icon");
     
     // Remove all classes and add the status class
-    statusElement.removeClass("loading pass fail unknown").addClass(status);
+    statusElement.className = "result-status " + status;
     
     // Set the text
-    statusElement.text(text);
+    statusElement.textContent = text;
     
     // Update icon
-    iconElement.attr("src", "https://rdyy89.github.io/authopsy-addin/icons/" + status + ".png");
+    iconElement.src = "https://rdyy89.github.io/authopsy-addin/icons/" + status + ".png";
   }
   
   // Get status text from status code
@@ -173,9 +176,12 @@
   
   // Handle errors
   function handleError(message) {
-    $("#dmarcStatus").text("Error").addClass("unknown");
-    $("#dkimStatus").text("Error").addClass("unknown");
-    $("#spfStatus").text("Error").addClass("unknown");
+    document.getElementById("dmarcStatus").textContent = "Error";
+    document.getElementById("dmarcStatus").className = "result-status unknown";
+    document.getElementById("dkimStatus").textContent = "Error";
+    document.getElementById("dkimStatus").className = "result-status unknown";
+    document.getElementById("spfStatus").textContent = "Error";
+    document.getElementById("spfStatus").className = "result-status unknown";
     
     console.error("Error: " + message);
   }
