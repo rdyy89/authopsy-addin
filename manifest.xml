@@ -5,17 +5,17 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
-  <Id>YOUR-ADDIN-ID</Id>
+  <Id>com.rdyy89.authopsy</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>Your Provider Name</ProviderName>
+  <ProviderName>rdyy89</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName resid="DisplayName" />
   <Description resid="Description" />
-  <IconUrl>https://yourdomain.com/path/to/icon.png</IconUrl>
-  <HighResolutionIconUrl>https://yourdomain.com/path/to/icon@2x.png</HighResolutionIconUrl>
-  <SupportUrl>https://yourdomain.com/support</SupportUrl>
+  <IconUrl>https://rdyy89.github.io/authopsy-addin/icons/authopsy.png</IconUrl>
+  <HighResolutionIconUrl>https://rdyy89.github.io/authopsy-addin/icons/authopsy@2x.png</HighResolutionIconUrl>
+  <SupportUrl>https://github.com/rdyy89/authopsy-addin/issues</SupportUrl>
   <AppDomains>
-    <AppDomain>https://yourdomain.com</AppDomain>
+    <AppDomain>https://rdyy89.github.io</AppDomain>
   </AppDomains>
   <Permissions>ReadWriteMailbox</Permissions>
   <Requirements>
@@ -99,12 +99,12 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://yourdomain.com/path/to/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://yourdomain.com/path/to/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://yourdomain.com/path/to/icon-80.png" />
+        <bt:Image id="Icon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="apiUrl" DefaultValue="https://yourdomain.com/api/" />
+        <bt:Url id="apiUrl" DefaultValue="https://rdyy89.github.io/authopsy-addin/api/" />
       </bt:Urls>
     </Resources>
   </VersionOverrides>
