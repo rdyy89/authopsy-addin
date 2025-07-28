@@ -135,7 +135,7 @@
       Office.context.ui.displayDialogAsync(
         "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
         encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
-        { height: 40, width: 50, displayInIframe: true },
+        { height: 50, width: 60, displayInIframe: true },
         function (result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
             console.error("Results dialog failed: " + result.error.message);
@@ -143,6 +143,8 @@
             if (typeof alert !== 'undefined') {
               alert(title + "\n\n" + content);
             }
+          } else {
+            console.log("Results dialog opened successfully");
           }
         }
       );
