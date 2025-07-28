@@ -4,122 +4,94 @@
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
-
-  <Id>123e4567-e89b-12d3-a456-426614174000</Id>
+  <Id>e7b8c9a1-4f3d-4c2a-9b8e-123456789abc</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>rdyy89</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName resid="DisplayName" />
-  <Description resid="Description" />
-  <IconUrl>https://rdyy89.github.io/authopsy-addin/icons/authopsy.png</IconUrl>
-  <HighResolutionIconUrl>https://rdyy89.github.io/authopsy-addin/icons/authopsy@2x.png</HighResolutionIconUrl>
-  <SupportUrl>https://github.com/rdyy89/authopsy-addin/issues</SupportUrl>
+  <DisplayName DefaultValue="Authopsy" />
+  <Description DefaultValue="Analyze email authentication headers for DMARC, DKIM, and SPF." />
+  <IconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png" />
+  <HighResolutionIconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy@2x.png" />
+  <SupportUrl DefaultValue="https://github.com/rdyy89/authopsy-addin/issues" />
   <AppDomains>
-    <AppDomain>https://rdyy89.github.io</AppDomain>
+    <AppDomain DefaultValue="https://rdyy89.github.io/authopsy-addin/" />
   </AppDomains>
-  <Permissions>ReadWriteMailbox</Permissions>
   <Requirements>
     <Sets>
       <Set Name="Mailbox" MinVersion="1.1" />
     </Sets>
   </Requirements>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
-    <Hosts>
-      <Host xsi:type="MailHost">
-        <DesktopFormFactor>
-          <ExtensionPoint xsi:type="MessageReadCommandSurface">
-            <SupportsPinning>true</SupportsPinning>
-            <OfficeTab id="TabDefault">
-              <Group id="msgReadGroup">
-                <Label resid="GroupLabel" />
-                <Control xsi:type="Menu" id="msgReadMenuButton">
-                  <Label resid="MenuButtonLabel" />
-                  <Supertip>
-                    <Title resid="MenuSuperTipTitle" />
-                    <Description resid="MenuSuperTipDescription" />
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16" />
-                    <bt:Image size="32" resid="Icon.32x32" />
-                    <bt:Image size="80" resid="Icon.80x80" />
-                  </Icon>
-                  <Items>
-                    <Item id="dmarcItem">
-                      <Label resid="DmarcLabel" />
-                      <Supertip>
-                        <Title resid="DmarcSuperTipTitle" />
-                        <Description resid="DmarcSuperTipDesc" />
-                      </Supertip>
-                      <Icon>
-                        <bt:Image size="16" resid="Icon.16x16" />
-                        <bt:Image size="32" resid="Icon.32x32" />
-                        <bt:Image size="80" resid="Icon.80x80" />
-                      </Icon>
-                      <Action xsi:type="ExecuteFunction">
-                        <FunctionName>showDmarcDetails</FunctionName>
-                      </Action>
-                    </Item>
-                    <Item id="dkimItem">
-                      <Label resid="DkimLabel" />
-                      <Supertip>
-                        <Title resid="DkimSuperTipTitle" />
-                        <Description resid="DkimSuperTipDesc" />
-                      </Supertip>
-                      <Icon>
-                        <bt:Image size="16" resid="Icon.16x16" />
-                        <bt:Image size="32" resid="Icon.32x32" />
-                        <bt:Image size="80" resid="Icon.80x80" />
-                      </Icon>
-                      <Action xsi:type="ExecuteFunction">
-                        <FunctionName>showDkimDetails</FunctionName>
-                      </Action>
-                    </Item>
-                    <Item id="spfItem">
-                      <Label resid="SpfLabel" />
-                      <Supertip>
-                        <Title resid="SpfSuperTipTitle" />
-                        <Description resid="SpfSuperTipDesc" />
-                      </Supertip>
-                      <Icon>
-                        <bt:Image size="16" resid="Icon.16x16" />
-                        <bt:Image size="32" resid="Icon.32x32" />
-                        <bt:Image size="80" resid="Icon.80x80" />
-                      </Icon>
-                      <Action xsi:type="ExecuteFunction">
-                        <FunctionName>showSpfDetails</FunctionName>
-                      </Action>
-                    </Item>
-                  </Items>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-        </DesktopFormFactor>
-      </Host>
-    </Hosts>
-    <Resources>
-      <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
-      </bt:Images>
-      <bt:ShortStrings>
-        <bt:String id="DisplayName" DefaultValue="Authopsy" />
-        <bt:String id="Description" DefaultValue="Analyze email authentication headers for DMARC, DKIM, and SPF." />
-        <bt:String id="GroupLabel" DefaultValue="Authopsy Tools" />
-        <bt:String id="MenuButtonLabel" DefaultValue="Authopsy" />
-        <bt:String id="MenuSuperTipTitle" DefaultValue="Authopsy Email Analysis" />
-        <bt:String id="MenuSuperTipDescription" DefaultValue="Analyze email headers for authentication status." />
-        <bt:String id="DmarcLabel" DefaultValue="DMARC" />
-        <bt:String id="DmarcSuperTipTitle" DefaultValue="DMARC Analysis" />
-        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details." />
-        <bt:String id="DkimLabel" DefaultValue="DKIM" />
-        <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Analysis" />
-        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM signature verification details." />
-        <bt:String id="SpfLabel" DefaultValue="SPF" />
-        <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Analysis" />
-        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details." />
-      </bt:ShortStrings>
-    </Resources>
-  </VersionOverrides>
+  <Hosts>
+    <Host xsi:type="MailHost">
+      <DesktopFormFactor>
+        <ExtensionPoint xsi:type="MessageReadCommandSurface">
+          <SupportsPinning>true</SupportsPinning>
+          <OfficeTab id="TabDefault">
+            <Group id="msgReadGroup">
+              <Label DefaultValue="Authopsy Tools" />
+              <Control xsi:type="Menu" id="msgReadMenuButton">
+                <Label DefaultValue="Authopsy" />
+                <Supertip>
+                  <Title DefaultValue="Authopsy Email Analysis" />
+                  <Description DefaultValue="Analyze email headers for authentication status." />
+                </Supertip>
+                <Icon>
+                  <bt:Image size="16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
+                  <bt:Image size="32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
+                  <bt:Image size="80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
+                </Icon>
+                <Items>
+                  <Item id="dmarcItem">
+                    <Label DefaultValue="DMARC" />
+                    <Supertip>
+                      <Title DefaultValue="DMARC Analysis" />
+                      <Description DefaultValue="View DMARC authentication details." />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
+                      <bt:Image size="32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
+                      <bt:Image size="80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
+                    </Icon>
+                    <Action xsi:type="ExecuteFunction">
+                      <FunctionName>showDmarcDetails</FunctionName>
+                    </Action>
+                  </Item>
+                  <Item id="dkimItem">
+                    <Label DefaultValue="DKIM" />
+                    <Supertip>
+                      <Title DefaultValue="DKIM Analysis" />
+                      <Description DefaultValue="View DKIM signature verification details." />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
+                      <bt:Image size="32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
+                      <bt:Image size="80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
+                    </Icon>
+                    <Action xsi:type="ExecuteFunction">
+                      <FunctionName>showDkimDetails</FunctionName>
+                    </Action>
+                  </Item>
+                  <Item id="spfItem">
+                    <Label DefaultValue="SPF" />
+                    <Supertip>
+                      <Title DefaultValue="SPF Analysis" />
+                      <Description DefaultValue="View SPF authentication details." />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-16.png" />
+                      <bt:Image size="32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-32.png" />
+                      <bt:Image size="80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy-80.png" />
+                    </Icon>
+                    <Action xsi:type="ExecuteFunction">
+                      <FunctionName>showSpfDetails</FunctionName>
+                    </Action>
+                  </Item>
+                </Items>
+              </Control>
+            </Group>
+          </OfficeTab>
+        </ExtensionPoint>
+      </DesktopFormFactor>
+    </Host>
+  </Hosts>
 </OfficeApp>
