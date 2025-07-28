@@ -7,10 +7,6 @@
   }
   window.authopsyCommandsInitialized = true;
 
-  // Track active dialog
-  let activeDialog = null;
-  let pendingDialog = false;
-
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
     console.log("Commands initialized with reason: " + reason);
@@ -130,82 +126,71 @@
     }
   }
   
-  // Show results using dialog only
+  // Show results using notification messages (more reliable than dialogs)
   function showResult(title, content) {
     console.log(title + ": " + content);
     
-    // If we're already pending a dialog, don't try to open another
-    if (pendingDialog) {
-      console.log("Dialog already pending, ignoring request");
-      return;
-    }
-    
-    // Force close any existing dialog first
-    cleanupDialog();
-    
-    // Wait a moment before opening new dialog
-    setTimeout(function() {
-      openResultsDialog(title, content);
-    }, 100);
-  }
-  
-  // Helper function to clean up dialog state
-  function cleanupDialog() {
-    if (activeDialog) {
-      try {
-        activeDialog.close();
-      } catch (error) {
-        console.log("Error closing dialog: " + error.message);
-      }
-    }
-    activeDialog = null;
-    pendingDialog = false;
-  }
-  
-  // Helper function to open the results dialog
-  function openResultsDialog(title, content) {
-    if (pendingDialog) {
-      console.log("Another dialog is pending, skipping");
-      return;
-    }
-    
-    pendingDialog = true;
-    
     try {
-      // Try to open results page in dialog
-      Office.context.ui.displayDialogAsync(
-        "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
-        encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
-        { height: 50, width: 60, displayInIframe: true },
-        function (result) {
-          pendingDialog = false;
-          
+      // Try notification first (more reliable in Outlook Web)
+      if (Office.context.mailbox.item.notificationMessages) {
+        Office.context.mailbox.item.notificationMessages.addAsync("authopsyResult", {
+          type: "informationalMessage",
+          message: title + ": " + content.substring(0, 150) + (content.length > 150 ? "..." : ""),
+          icon: "iconid",
+          persistent: false
+        }, function(result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
-            console.error("Results dialog failed: " + result.error.message);
-            activeDialog = null;
+            console.error("Notification failed, trying task pane: " + result.error.message);
+            tryTaskPane(title, content);
           } else {
-            console.log("Results dialog opened successfully");
-            activeDialog = result.value;
-            
-            // Set up dialog event handlers with better cleanup
-            if (activeDialog) {
-              activeDialog.addEventHandler(Office.EventType.DialogEventReceived, function(eventArgs) {
-                console.log("Dialog event received:", eventArgs);
-                cleanupDialog();
-              });
+            console.log("Notification shown successfully");
+          }
+        });
+      } else {
+        console.log("Notifications not available, trying task pane");
+        tryTaskPane(title, content);
+      }
+    } catch (error) {
+      console.error("Error showing result: " + error.message);
+      tryTaskPane(title, content);
+    }
+  }
+  
+  // Fallback to try opening task pane
+  function tryTaskPane(title, content) {
+    try {
+      // For Outlook Web, try opening the task pane
+      if (Office.context.mailbox.item.body) {
+        Office.context.ui.displayDialogAsync(
+          "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
+          encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
+          { 
+            height: 60, 
+            width: 80, 
+            displayInIframe: false  // Don't use iframe for better compatibility
+          },
+          function (result) {
+            if (result.status === Office.AsyncResultStatus.Failed) {
+              console.error("Dialog failed: " + result.error.message);
+              // Final fallback - log to console
+              console.log("RESULT: " + title + " - " + content);
+            } else {
+              console.log("Dialog opened successfully");
+              const dialog = result.value;
               
-              activeDialog.addEventHandler(Office.EventType.DialogMessageReceived, function(eventArgs) {
-                console.log("Dialog message received:", eventArgs);
-                cleanupDialog();
+              // Handle dialog events
+              dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
+                if (arg.message === "dialogClosed") {
+                  dialog.close();
+                }
               });
             }
           }
-        }
-      );
+        );
+      }
     } catch (error) {
-      console.error("Results error: " + error.message);
-      pendingDialog = false;
-      activeDialog = null;
+      console.error("Task pane fallback failed: " + error.message);
+      console.log("FINAL RESULT: " + title + " - " + content);
     }
   }
   
@@ -215,15 +200,22 @@
     try {
       parseEmailHeaders(function(results) {
         showResult("DMARC Analysis", results.dmarc.details);
-        if (event && typeof event.completed === 'function') {
-          event.completed();
+        
+        // Always signal completion
+        if (event && event.completed) {
+          setTimeout(function() {
+            event.completed();
+          }, 100);
         }
       });
     } catch (error) {
       console.error("Error in showDmarcDetails: " + error.message);
       showResult("DMARC Error", "Failed to analyze DMARC: " + error.message);
-      if (event && typeof event.completed === 'function') {
-        event.completed();
+      
+      if (event && event.completed) {
+        setTimeout(function() {
+          event.completed();
+        }, 100);
       }
     }
   }
@@ -234,15 +226,22 @@
     try {
       parseEmailHeaders(function(results) {
         showResult("DKIM Analysis", results.dkim.details);
-        if (event && typeof event.completed === 'function') {
-          event.completed();
+        
+        // Always signal completion
+        if (event && event.completed) {
+          setTimeout(function() {
+            event.completed();
+          }, 100);
         }
       });
     } catch (error) {
       console.error("Error in showDkimDetails: " + error.message);
       showResult("DKIM Error", "Failed to analyze DKIM: " + error.message);
-      if (event && typeof event.completed === 'function') {
-        event.completed();
+      
+      if (event && event.completed) {
+        setTimeout(function() {
+          event.completed();
+        }, 100);
       }
     }
   }
@@ -253,15 +252,22 @@
     try {
       parseEmailHeaders(function(results) {
         showResult("SPF Analysis", results.spf.details);
-        if (event && typeof event.completed === 'function') {
-          event.completed();
+        
+        // Always signal completion
+        if (event && event.completed) {
+          setTimeout(function() {
+            event.completed();
+          }, 100);
         }
       });
     } catch (error) {
       console.error("Error in showSpfDetails: " + error.message);
       showResult("SPF Error", "Failed to analyze SPF: " + error.message);
-      if (event && typeof event.completed === 'function') {
-        event.completed();
+      
+      if (event && event.completed) {
+        setTimeout(function() {
+          event.completed();
+        }, 100);
       }
     }
   }

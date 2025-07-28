@@ -76,43 +76,52 @@
 
     <script>
         // Initialize Office
+        Office.onReady(function(info) {
+            console.log("Results dialog ready - Host:", info.host, "Platform:", info.platform);
+            initializeDialog();
+        });
+        
+        // Legacy fallback
         Office.initialize = function(reason) {
-            console.log("Results dialog initialized");
+            console.log("Results dialog initialized (legacy)");
+            initializeDialog();
         };
         
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const title = urlParams.get('title') || 'Analysis Results';
-        const content = urlParams.get('content') || 'No results available';
-        
-        // Set content
-        document.getElementById('resultTitle').textContent = title;
-        document.getElementById('resultContent').textContent = content;
-        
-        // Determine status from content
-        let status = 'unknown';
-        if (content.toLowerCase().includes('passed') || content.toLowerCase().includes('pass')) {
-            status = 'pass';
-        } else if (content.toLowerCase().includes('failed') || content.toLowerCase().includes('fail')) {
-            status = 'fail';
-        }
-        
-        const statusElement = document.getElementById('resultStatus');
-        statusElement.className = 'status ' + status;
-        
-        if (status === 'pass') {
-            statusElement.textContent = '✅ PASSED';
-        } else if (status === 'fail') {
-            statusElement.textContent = '❌ FAILED';
-        } else {
-            statusElement.textContent = '❓ UNKNOWN';
+        function initializeDialog() {
+            // Parse URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const title = urlParams.get('title') || 'Analysis Results';
+            const content = urlParams.get('content') || 'No results available';
+            
+            // Set content
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultContent').textContent = content;
+            
+            // Determine status from content
+            let status = 'unknown';
+            if (content.toLowerCase().includes('passed') || content.toLowerCase().includes('pass')) {
+                status = 'pass';
+            } else if (content.toLowerCase().includes('failed') || content.toLowerCase().includes('fail')) {
+                status = 'fail';
+            }
+            
+            const statusElement = document.getElementById('resultStatus');
+            statusElement.className = 'status ' + status;
+            
+            if (status === 'pass') {
+                statusElement.textContent = '✅ PASSED';
+            } else if (status === 'fail') {
+                statusElement.textContent = '❌ FAILED';
+            } else {
+                statusElement.textContent = '❓ UNKNOWN';
+            }
         }
         
         // Function to properly close the dialog
         function closeDialog() {
             try {
                 // Send message to parent before closing
-                if (Office.context && Office.context.ui) {
+                if (Office.context && Office.context.ui && Office.context.ui.messageParent) {
                     Office.context.ui.messageParent("dialogClosed");
                 }
             } catch (error) {
@@ -120,11 +129,13 @@
             }
             
             // Try to close the window
-            try {
-                window.close();
-            } catch (error) {
-                console.log("Error closing window: " + error.message);
-            }
+            setTimeout(function() {
+                try {
+                    window.close();
+                } catch (error) {
+                    console.log("Error closing window: " + error.message);
+                }
+            }, 100);
         }
         
         // Handle browser close events
