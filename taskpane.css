@@ -1,324 +1,61 @@
-/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. */
-
-/* General Styles */
-html,
 body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #faf9f8;
-}
-
-.ms-welcome {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    min-height: 100vh;
-}
-
-.ms-welcome__header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #0078d4;
-    color: white;
-    margin-bottom: 20px;
-}
-
-.ms-welcome__header img {
-    margin-bottom: 10px;
-}
-
-.ms-welcome__header h1 {
     margin: 0;
-    font-size: 24px;
-    font-weight: 300;
-}
-
-.ms-welcome__main {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    flex: 1 1 0;
-    padding: 0 20px 20px;
-}
-
-.ms-welcome__intro {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.pin-info {
-    background-color: #f8f9fa;
-    border: 1px solid #e1dfdd;
-    border-radius: 4px;
     padding: 10px;
-    margin-top: 15px;
-    text-align: left;
 }
-
-.pin-info p {
-    margin: 0;
-    line-height: 1.4;
-}
-
-.quick-actions {
-    margin-top: 15px;
+.header {
     text-align: center;
+    margin-bottom: 20px;
 }
-
-.quick-btn {
-    background-color: #0078d4;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-    margin: 0 5px;
-}
-
-.quick-btn:hover {
-    background-color: #106ebe;
-}
-
-/* Quick notification styles */
-.quick-notification {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 1.4;
-    white-space: pre-line;
-    display: none;
-}
-
-.quick-notification.success {
-    background-color: #dff6dd;
-    border: 1px solid #107c10;
-    color: #107c10;
-}
-
-.quick-notification.error {
-    background-color: #fde7e9;
-    border: 1px solid #d13438;
-    color: #d13438;
-}
-
-.quick-notification.warning {
-    background-color: #fff4ce;
-    border: 1px solid #ff8c00;
-    color: #ff8c00;
-}
-
-.quick-notification.info {
-    background-color: #deecf9;
-    border: 1px solid #0078d4;
-    color: #0078d4;
-}
-
-/* Loading Styles */
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.loading-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #0078d4;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 2s linear infinite;
-    margin-top: 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Results Styles */
-.results-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.auth-result {
-    background-color: white;
-    border: 1px solid #e1dfdd;
-    border-radius: 6px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.auth-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.logo {
+    max-width: 50px;
     margin-bottom: 10px;
 }
-
-.status-icon {
-    width: 20px;
-    height: 20px;
-}
-
-.auth-label {
-    font-weight: 600;
-    min-width: 60px;
-    color: #323130;
-}
-
-.auth-status {
-    color: #605e5c;
-    flex: 1;
-}
-
-.auth-status.pass {
-    color: #107c10;
-    font-weight: 600;
-}
-
-.auth-status.fail {
-    color: #d13438;
-    font-weight: 600;
-}
-
-.auth-status.unknown {
-    color: #ff8c00;
-    font-weight: 600;
-}
-
-.details-btn {
-    background-color: #0078d4;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.2s;
-}
-
-.details-btn:hover {
-    background-color: #106ebe;
-}
-
-/* Error Styles */
-.error-container {
-    text-align: center;
-    padding: 20px;
-    background-color: #fef7f1;
-    border: 1px solid #fed9cc;
-    border-radius: 6px;
-}
-
-/* Modal Styles */
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 0;
-    border-radius: 6px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #e1dfdd;
-    background-color: #f8f8f8;
-    border-radius: 6px 6px 0 0;
-}
-
-.modal-header h2 {
+h1 {
+    font-size: 18px;
     margin: 0;
-    color: #323130;
+    padding: 0;
 }
-
-.close {
-    color: #aaa;
-    font-size: 28px;
+.results {
+    margin-top: 20px;
+}
+.result-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+}
+.result-icon {
+    width: 24px;
+    margin-right: 10px;
+}
+.result-label {
     font-weight: bold;
+    margin-right: 10px;
+    width: 60px;
+}
+.result-status {
+    flex-grow: 1;
+}
+.result-status.loading {
+    color: #888;
+    font-style: italic;
+}
+.result-status.pass {
+    color: green;
+}
+.result-status.fail {
+    color: red;
+}
+.result-status.unknown {
+    color: #e67e00;
+}
+.details-btn {
+    background: none;
+    border: none;
+    color: #0078d4;
     cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: #000;
-}
-
-.modal-body {
-    padding: 20px;
-    line-height: 1.5;
-}
-
-/* Utility Classes */
-.ms-u-fadeIn500 {
-    animation: fadeIn 500ms ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.ms-font-su {
-    font-size: 42px;
-    font-weight: 100;
-}
-
-.ms-font-xl {
-    font-size: 21px;
-    font-weight: 100;
-}
-
-.ms-font-l {
-    font-size: 17px;
-    font-weight: 300;
-}
-
-.ms-font-m {
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.ms-font-s {
-    font-size: 12px;
-    font-weight: 400;
-}
-
-.ms-fontColor-neutralPrimary {
-    color: #323130;
-}
-
-.ms-fontColor-neutralSecondary {
-    color: #605e5c;
-}
-
-.ms-fontColor-error {
-    color: #d13438;
+    text-decoration: underline;
 }

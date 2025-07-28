@@ -33,15 +33,15 @@
     <Form xsi:type="ItemRead">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>350</RequestedHeight>
+        <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
       <TabletSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>350</RequestedHeight>
+        <RequestedHeight>250</RequestedHeight>
       </TabletSettings>
       <PhoneSettings>
         <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>350</RequestedHeight>
+        <RequestedHeight>250</RequestedHeight>
       </PhoneSettings>
     </Form>
   </FormSettings>
@@ -52,15 +52,7 @@
   <!-- Rule -->
   <Rule xsi:type="RuleCollection" Mode="Or">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="ReadOrEdit" />
-    <Rule xsi:type="ItemHasAttachment" />
-    <Rule xsi:type="ItemHasRegularExpressionMatch" RegExName="HeaderCheck" RegExValue=".*" PropertyName="InternetHeaders" />
   </Rule>
-
-  <!-- Regular expressions for rules -->
-  <RegExCollection>
-    <RegEx Name="HeaderCheck" Value="." IgnoreCase="true" />
-  </RegExCollection>
 
   <!-- VERSION OVERRIDES - ADD DROPDOWN MENU -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
