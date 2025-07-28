@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  // Prevent multiple initialization
+  if (window.authopsyCommandsInitialized) {
+    return;
+  }
+  window.authopsyCommandsInitialized = true;
+
   // The Office initialize function must be run each time a new page is loaded
   Office.initialize = function (reason) {
     console.log("Commands initialized with reason: " + reason);
@@ -120,18 +126,22 @@
     }
   }
   
-  // Show notification instead of dialog for better compatibility
+  // Show notification - simplified and more reliable
   function showNotification(title, content) {
     try {
-      Office.context.mailbox.item.notificationMessages.addAsync("authopsyResult", {
-        type: "informationalMessage",
-        message: title + ": " + content,
-        icon: "iconid",
-        persistent: true
-      }, function(result) {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          console.error("Notification failed: " + result.error.message);
-        }
+      // Clear any existing notifications first
+      Office.context.mailbox.item.notificationMessages.removeAsync("authopsyResult", function() {
+        // Add new notification
+        Office.context.mailbox.item.notificationMessages.addAsync("authopsyResult", {
+          type: "informationalMessage",
+          message: title + ": " + content,
+          icon: "iconid",
+          persistent: false
+        }, function(result) {
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Notification failed: " + result.error.message);
+          }
+        });
       });
     } catch (error) {
       console.error("Notification error: " + error.message);
@@ -144,14 +154,14 @@
     try {
       parseEmailHeaders(function(results) {
         showNotification("DMARC Analysis", results.dmarc.details);
-        if (event && event.completed) {
+        if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showDmarcDetails: " + error.message);
       showNotification("DMARC Error", "Failed to analyze DMARC: " + error.message);
-      if (event && event.completed) {
+      if (event && typeof event.completed === 'function') {
         event.completed();
       }
     }
@@ -163,14 +173,14 @@
     try {
       parseEmailHeaders(function(results) {
         showNotification("DKIM Analysis", results.dkim.details);
-        if (event && event.completed) {
+        if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showDkimDetails: " + error.message);
       showNotification("DKIM Error", "Failed to analyze DKIM: " + error.message);
-      if (event && event.completed) {
+      if (event && typeof event.completed === 'function') {
         event.completed();
       }
     }
@@ -182,27 +192,30 @@
     try {
       parseEmailHeaders(function(results) {
         showNotification("SPF Analysis", results.spf.details);
-        if (event && event.completed) {
+        if (event && typeof event.completed === 'function') {
           event.completed();
         }
       });
     } catch (error) {
       console.error("Error in showSpfDetails: " + error.message);
       showNotification("SPF Error", "Failed to analyze SPF: " + error.message);
-      if (event && event.completed) {
+      if (event && typeof event.completed === 'function') {
         event.completed();
       }
     }
   }
 
-  // Register functions with Office.actions
+  // Register functions with Office.actions - only once
   function registerActions() {
     try {
-      if (Office.actions) {
+      if (Office.actions && !window.authopsyActionsRegistered) {
         Office.actions.associate("showDmarcDetails", showDmarcDetails);
         Office.actions.associate("showDkimDetails", showDkimDetails);
         Office.actions.associate("showSpfDetails", showSpfDetails);
+        window.authopsyActionsRegistered = true;
         console.log("Actions registered successfully");
+      } else if (window.authopsyActionsRegistered) {
+        console.log("Actions already registered");
       } else {
         console.warn("Office.actions not available");
       }
@@ -212,7 +225,7 @@
   }
 
   // Register actions when Office is ready
-  if (Office.context) {
+  if (Office.context && Office.actions) {
     registerActions();
   } else {
     Office.onReady(function() {
@@ -221,7 +234,9 @@
   }
 
   // Also expose globally as fallback
-  window.showDmarcDetails = showDmarcDetails;
-  window.showDkimDetails = showDkimDetails;
-  window.showSpfDetails = showSpfDetails;
+  if (!window.showDmarcDetails) {
+    window.showDmarcDetails = showDmarcDetails;
+    window.showDkimDetails = showDkimDetails;
+    window.showSpfDetails = showSpfDetails;
+  }
 })();
