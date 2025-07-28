@@ -106,6 +106,23 @@
       <bt:Urls>
         <bt:Url id="apiUrl" DefaultValue="https://rdyy89.github.io/authopsy-addin/api/" />
       </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="DisplayName" DefaultValue="Authopsy" />
+        <bt:String id="Description" DefaultValue="Analyze email authentication headers for DMARC, DKIM, and SPF." />
+        <bt:String id="GroupLabel" DefaultValue="Authopsy Tools" />
+        <bt:String id="MenuButtonLabel" DefaultValue="Authopsy" />
+        <bt:String id="MenuSuperTipTitle" DefaultValue="Authopsy Email Analysis" />
+        <bt:String id="MenuSuperTipDescription" DefaultValue="Analyze email headers for authentication status." />
+        <bt:String id="DmarcLabel" DefaultValue="DMARC" />
+        <bt:String id="DmarcSuperTipTitle" DefaultValue="DMARC Analysis" />
+        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details." />
+        <bt:String id="DkimLabel" DefaultValue="DKIM" />
+        <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Analysis" />
+        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM signature verification details." />
+        <bt:String id="SpfLabel" DefaultValue="SPF" />
+        <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Analysis" />
+        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details." />
+      </bt:ShortStrings>
     </Resources>
   </VersionOverrides>
 </OfficeApp>
