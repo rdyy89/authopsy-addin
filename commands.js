@@ -130,21 +130,44 @@
   function showResult(title, content) {
     console.log(title + ": " + content);
     
+    // Generate unique key based on timestamp and type
+    const notificationKey = "authopsy_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    
     try {
       // Try notification first (more reliable in Outlook Web)
       if (Office.context.mailbox.item.notificationMessages) {
-        Office.context.mailbox.item.notificationMessages.addAsync("authopsyResult", {
-          type: "informationalMessage",
-          message: title + ": " + content.substring(0, 150) + (content.length > 150 ? "..." : ""),
-          icon: "iconid",
-          persistent: false
-        }, function(result) {
-          if (result.status === Office.AsyncResultStatus.Failed) {
-            console.error("Notification failed, trying task pane: " + result.error.message);
-            tryTaskPane(title, content);
-          } else {
-            console.log("Notification shown successfully");
+        // Clear any existing notifications first
+        Office.context.mailbox.item.notificationMessages.getAllAsync(function(getAllResult) {
+          if (getAllResult.status === Office.AsyncResultStatus.Succeeded) {
+            // Remove existing authopsy notifications
+            getAllResult.value.forEach(function(notification) {
+              if (notification.key && notification.key.startsWith("authopsy")) {
+                Office.context.mailbox.item.notificationMessages.removeAsync(notification.key);
+              }
+            });
           }
+          
+          // Add new notification after clearing
+          setTimeout(function() {
+            Office.context.mailbox.item.notificationMessages.addAsync(notificationKey, {
+              type: "informationalMessage",
+              message: title + ": " + content.substring(0, 150) + (content.length > 150 ? "..." : ""),
+              icon: "iconid",
+              persistent: true  // Make it persistent so user can read it
+            }, function(result) {
+              if (result.status === Office.AsyncResultStatus.Failed) {
+                console.error("Notification failed, trying task pane: " + result.error.message);
+                tryTaskPane(title, content);
+              } else {
+                console.log("Notification shown successfully with key: " + notificationKey);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(function() {
+                  Office.context.mailbox.item.notificationMessages.removeAsync(notificationKey);
+                }, 5000);
+              }
+            });
+          }, 100);
         });
       } else {
         console.log("Notifications not available, trying task pane");
@@ -159,35 +182,33 @@
   // Fallback to try opening task pane
   function tryTaskPane(title, content) {
     try {
-      // For Outlook Web, try opening the task pane
-      if (Office.context.mailbox.item.body) {
-        Office.context.ui.displayDialogAsync(
-          "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
-          encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
-          { 
-            height: 60, 
-            width: 80, 
-            displayInIframe: false  // Don't use iframe for better compatibility
-          },
-          function (result) {
-            if (result.status === Office.AsyncResultStatus.Failed) {
-              console.error("Dialog failed: " + result.error.message);
-              // Final fallback - log to console
-              console.log("RESULT: " + title + " - " + content);
-            } else {
-              console.log("Dialog opened successfully");
-              const dialog = result.value;
-              
-              // Handle dialog events
-              dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
-                if (arg.message === "dialogClosed") {
-                  dialog.close();
-                }
-              });
-            }
+      // For Outlook Web, try opening the dialog
+      Office.context.ui.displayDialogAsync(
+        "https://rdyy89.github.io/authopsy-addin/results.html?title=" + 
+        encodeURIComponent(title) + "&content=" + encodeURIComponent(content),
+        { 
+          height: 60, 
+          width: 80, 
+          displayInIframe: false
+        },
+        function (result) {
+          if (result.status === Office.AsyncResultStatus.Failed) {
+            console.error("Dialog failed: " + result.error.message);
+            // Final fallback - log to console
+            console.log("RESULT: " + title + " - " + content);
+          } else {
+            console.log("Dialog opened successfully");
+            const dialog = result.value;
+            
+            // Handle dialog events
+            dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
+              if (arg.message === "dialogClosed") {
+                dialog.close();
+              }
+            });
           }
-        );
-      }
+        }
+      );
     } catch (error) {
       console.error("Task pane fallback failed: " + error.message);
       console.log("FINAL RESULT: " + title + " - " + content);

@@ -75,7 +75,7 @@
     </div>
 
     <script>
-        // Initialize Office
+        // Initialize Office with better error handling
         Office.onReady(function(info) {
             console.log("Results dialog ready - Host:", info.host, "Platform:", info.platform);
             initializeDialog();
@@ -88,37 +88,46 @@
         };
         
         function initializeDialog() {
-            // Parse URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const title = urlParams.get('title') || 'Analysis Results';
-            const content = urlParams.get('content') || 'No results available';
-            
-            // Set content
-            document.getElementById('resultTitle').textContent = title;
-            document.getElementById('resultContent').textContent = content;
-            
-            // Determine status from content
-            let status = 'unknown';
-            if (content.toLowerCase().includes('passed') || content.toLowerCase().includes('pass')) {
-                status = 'pass';
-            } else if (content.toLowerCase().includes('failed') || content.toLowerCase().includes('fail')) {
-                status = 'fail';
-            }
-            
-            const statusElement = document.getElementById('resultStatus');
-            statusElement.className = 'status ' + status;
-            
-            if (status === 'pass') {
-                statusElement.textContent = '✅ PASSED';
-            } else if (status === 'fail') {
-                statusElement.textContent = '❌ FAILED';
-            } else {
-                statusElement.textContent = '❓ UNKNOWN';
+            try {
+                // Parse URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const title = urlParams.get('title') || 'Analysis Results';
+                const content = urlParams.get('content') || 'No results available';
+                
+                console.log("Setting dialog content:", title, content.substring(0, 50) + "...");
+                
+                // Set content
+                document.getElementById('resultTitle').textContent = title;
+                document.getElementById('resultContent').textContent = content;
+                
+                // Determine status from content
+                let status = 'unknown';
+                if (content.toLowerCase().includes('passed') || content.toLowerCase().includes('pass')) {
+                    status = 'pass';
+                } else if (content.toLowerCase().includes('failed') || content.toLowerCase().includes('fail')) {
+                    status = 'fail';
+                }
+                
+                const statusElement = document.getElementById('resultStatus');
+                statusElement.className = 'status ' + status;
+                
+                if (status === 'pass') {
+                    statusElement.textContent = '✅ PASSED';
+                } else if (status === 'fail') {
+                    statusElement.textContent = '❌ FAILED';
+                } else {
+                    statusElement.textContent = '❓ UNKNOWN';
+                }
+                
+                console.log("Dialog initialized successfully");
+            } catch (error) {
+                console.error("Error initializing dialog:", error);
             }
         }
         
         // Function to properly close the dialog
         function closeDialog() {
+            console.log("Closing dialog");
             try {
                 // Send message to parent before closing
                 if (Office.context && Office.context.ui && Office.context.ui.messageParent) {
@@ -141,7 +150,7 @@
         // Handle browser close events
         window.addEventListener('beforeunload', function() {
             try {
-                if (Office.context && Office.context.ui) {
+                if (Office.context && Office.context.ui && Office.context.ui.messageParent) {
                     Office.context.ui.messageParent("dialogClosed");
                 }
             } catch (error) {

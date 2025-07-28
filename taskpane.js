@@ -5,7 +5,29 @@
   let _messageId = "";
 
   // The Office initialize function must be run each time a new page is loaded
+  Office.onReady(function(info) {
+    console.log("Taskpane ready - Host:", info.host, "Platform:", info.platform);
+    
+    $(document).ready(function () {
+      console.log("DOM ready, setting up event handlers");
+      
+      // Set up event handlers
+      $("#dmarcDetails").on("click", showDmarcDetails);
+      $("#dkimDetails").on("click", showDkimDetails);
+      $("#spfDetails").on("click", showSpfDetails);
+      $("#pinButton").on("click", handlePinning);
+      
+      console.log("Event handlers set up, starting analysis");
+      
+      // Start the analysis
+      analyzeEmailHeaders();
+    });
+  });
+
+  // Legacy fallback for older Office versions
   Office.initialize = function (reason) {
+    console.log("Taskpane initialized (legacy) with reason: " + reason);
+    
     $(document).ready(function () {
       // Set up event handlers
       $("#dmarcDetails").on("click", showDmarcDetails);
@@ -194,10 +216,20 @@
         encodeURIComponent(title) + 
         "&content=" + 
         encodeURIComponent(content),
-        { height: 40, width: 30, displayInIframe: true },
+        { height: 50, width: 70, displayInIframe: false },
         function (result) {
           if (result.status === Office.AsyncResultStatus.Failed) {
             console.error("Dialog creation failed: " + result.error.message);
+          } else {
+            console.log("Dialog opened successfully");
+            
+            // Handle dialog events
+            const dialog = result.value;
+            dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
+              if (arg.message === "dialogClosed") {
+                dialog.close();
+              }
+            });
           }
         }
       );
