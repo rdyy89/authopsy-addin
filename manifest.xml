@@ -5,57 +5,30 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
-  <Id>a13c4ac8-f7c4-4c65-8f4a-2a1b8c7e9f0d</Id>
+  <Id>YOUR-ADDIN-ID</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>Authopsy</ProviderName>
+  <ProviderName>Your Provider Name</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Authopsy"/>
-  <Description DefaultValue="Email authentication analyzer"/>
-  <IconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-  <HighResolutionIconUrl DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-
-  <Hosts>
-    <Host Name="Mailbox" />
-  </Hosts>
-
+  <DisplayName resid="DisplayName" />
+  <Description resid="Description" />
+  <IconUrl>https://yourdomain.com/path/to/icon.png</IconUrl>
+  <HighResolutionIconUrl>https://yourdomain.com/path/to/icon@2x.png</HighResolutionIconUrl>
+  <SupportUrl>https://yourdomain.com/support</SupportUrl>
+  <AppDomains>
+    <AppDomain>https://yourdomain.com</AppDomain>
+  </AppDomains>
+  <Permissions>ReadWriteMailbox</Permissions>
   <Requirements>
     <Sets>
       <Set Name="Mailbox" MinVersion="1.1" />
     </Sets>
   </Requirements>
-
-  <FormSettings>
-    <Form xsi:type="ItemRead">
-      <DesktopSettings>
-        <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>250</RequestedHeight>
-      </DesktopSettings>
-      <TabletSettings>
-        <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-        <RequestedHeight>250</RequestedHeight>
-      </TabletSettings>
-      <PhoneSettings>
-        <SourceLocation DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
-      </PhoneSettings>
-    </Form>
-  </FormSettings>
-
-  <Permissions>ReadItem</Permissions>
-  <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
-  </Rule>
-
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
-    <Requirements>
-      <bt:Sets>
-        <bt:Set Name="Mailbox" MinVersion="1.3" />
-      </bt:Sets>
-    </Requirements>
-
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <SupportsPinning>true</SupportsPinning>
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
                 <Label resid="GroupLabel" />
@@ -124,36 +97,15 @@
         </DesktopFormFactor>
       </Host>
     </Hosts>
-
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://rdyy89.github.io/authopsy-addin/icons/authopsy.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://yourdomain.com/path/to/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://yourdomain.com/path/to/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://yourdomain.com/path/to/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://rdyy89.github.io/authopsy-addin/taskpane.html"/>
+        <bt:Url id="apiUrl" DefaultValue="https://yourdomain.com/api/" />
       </bt:Urls>
-      <bt:ShortStrings>
-        <bt:String id="GroupLabel" DefaultValue="Authopsy"/>
-        <bt:String id="MenuButtonLabel" DefaultValue="Authopsy"/>
-        <bt:String id="MenuSuperTipTitle" DefaultValue="Authopsy"/>
-        <bt:String id="DmarcLabel" DefaultValue="DMARC"/>
-        <bt:String id="DmarcSuperTipTitle" DefaultValue="DMARC Authentication"/>
-        <bt:String id="DkimLabel" DefaultValue="DKIM"/>
-        <bt:String id="DkimSuperTipTitle" DefaultValue="DKIM Authentication"/>
-        <bt:String id="SpfLabel" DefaultValue="SPF"/>
-        <bt:String id="SpfSuperTipTitle" DefaultValue="SPF Authentication"/>
-      </bt:ShortStrings>
-      <bt:LongStrings>
-        <bt:String id="MenuSuperTipDescription" DefaultValue="Check email authentication status."/>
-        <bt:String id="DmarcSuperTipDesc" DefaultValue="View DMARC authentication details."/>
-        <bt:String id="DkimSuperTipDesc" DefaultValue="View DKIM authentication details."/>
-        <bt:String id="SpfSuperTipDesc" DefaultValue="View SPF authentication details."/>
-      </bt:LongStrings>
     </Resources>
-
-    <FunctionFile resid="Commands.Url"/>
   </VersionOverrides>
 </OfficeApp>

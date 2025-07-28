@@ -228,4 +228,19 @@
       showDialog("SPF Details", "No SPF information available");
     }
   }
+  
+  // Handle pinning behavior
+  function handlePinning() {
+    Office.context.ui.displayDialogAsync(
+      "https://rdyy89.github.io/authopsy-addin/dialog.html?title=Pin%20Authopsy&content=Would%20you%20like%20to%20pin%20Authopsy%20for%20quick%20access?",
+      { height: 30, width: 20, displayInIframe: true },
+      function (result) {
+        if (result.status === Office.AsyncResultStatus.Failed) {
+          console.error("Dialog creation failed: " + result.error.message);
+        }
+      }
+    );
+  }
+  
+  document.getElementById("pinButton").addEventListener("click", handlePinning);
 })();
